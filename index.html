@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>오리 농장</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
 <style>
 /* 한 화면 3D 농장: 위 자원·상태 줄, 왼쪽 목표, 왼쪽 아래 조이스틱, 오른쪽 아래 점프·줄서·짓기 */
@@ -12,6 +12,7 @@
   color-scheme:light;
 }
 html,body{height:100%;margin:0;overflow:hidden;background:#8FCBF0;color:var(--ink);font-family:var(--font);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button,.chip,.btn,.hud,.bar,.acts,#acts{touch-action:manipulation}#acts .btn,.joy{touch-action:none}
 #cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
 .hud{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;gap:6px;
   padding:max(8px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
@@ -870,6 +871,12 @@ joyEl.addEventListener('pointerdown',e=>{ac();joy.on=true;joy.id=e.pointerId;try
 joyEl.addEventListener('pointermove',e=>{if(joy.on&&e.pointerId===joy.id)joyMove(e);});
 ['pointerup','pointercancel','lostpointercapture'].forEach(n=>joyEl.addEventListener(n,e=>{if(e.pointerId!==joy.id)return;joy.on=false;joy.x=joy.y=0;knob.style.transform='';}));
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k===' '&&!modalOpen&&!keys[' ']){jump();e.preventDefault();}keys[k]=true;});addEventListener('keyup',e=>{const k=e.key.toLowerCase();keys[k]=false;if(k===' ')jumpHeld=false;});
+// 아이패드: 버튼을 빠르게 연타해도 화면이 확대되지 않게(두 번 탭 확대·핀치 확대 막기)
+['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+let lastTE=0;document.addEventListener('touchend',e=>{const t=e.target,now=Date.now();const typing=t&&t.closest&&t.closest('input,textarea,select');if(!typing&&now-lastTE<350)e.preventDefault();lastTE=now;},{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1&&!(e.target&&e.target.closest&&e.target.closest('#cv')))e.preventDefault();},{passive:false});
+$('#acts').addEventListener('touchstart',e=>{const b=e.target.closest('[data-a="jump"]');if(b){e.preventDefault();jump();b.dataset.pd=performance.now();}},{passive:false});
 $('#acts').addEventListener('pointerdown',e=>{const b=e.target.closest('[data-a="jump"]');if(b){jump();b.dataset.pd=performance.now();e.preventDefault();}});['pointerup','pointercancel'].forEach(n=>addEventListener(n,()=>{if(!keys[' '])jumpHeld=false;}));
 function jump(){if(scene_==='play'){girl.buf=0.18;jumpHeld=true;}}
 function girlBlocked(x,z){if(outB(x,z))return true;for(const c of CL){if(Math.abs(x-c.x)<c.w/2+0.18&&Math.abs(z-c.z)<c.d/2+0.18&&c.top>girl.y+0.72&&!(c.bot!=null&&girl.y+1.5<c.bot))return true;}
