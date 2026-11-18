@@ -914,7 +914,13 @@ function joyMove(e){const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy
 joyEl.addEventListener('pointerdown',e=>{ac();joy.on=true;joy.id=e.pointerId;try{joyEl.setPointerCapture(e.pointerId);}catch(_){}joyMove(e);girl.tx=null;e.preventDefault();});
 joyEl.addEventListener('pointermove',e=>{if(joy.on&&e.pointerId===joy.id)joyMove(e);});
 ['pointerup','pointercancel','lostpointercapture'].forEach(n=>joyEl.addEventListener(n,e=>{if(e.pointerId!==joy.id)return;joy.on=false;joy.x=joy.y=0;knob.style.transform='';}));
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k===' '&&!modalOpen&&!keys[' ']){jump();e.preventDefault();}keys[k]=true;});addEventListener('keyup',e=>{const k=e.key.toLowerCase();keys[k]=false;if(k===' ')jumpHeld=false;});
+// 키보드: 한글 입력 상태·대소문자와 상관없이 물리 키(e.code)로 읽고, 창을 벗어나면 모두 놓은 것으로 처리(키가 눌린 채로 남아 저절로 걷는 문제 방지)
+const KMAP={KeyW:'w',ArrowUp:'w',KeyS:'s',ArrowDown:'s',KeyA:'a',ArrowLeft:'a',KeyD:'d',ArrowRight:'d',Space:' '};
+const typingIn=e=>{const t=e.target;return t&&t.closest&&t.closest('input,textarea,select,[contenteditable]');};
+function releaseKeys(){Object.keys(keys).forEach(k=>keys[k]=false);jumpHeld=false;}
+addEventListener('keydown',e=>{if(typingIn(e))return;if(e.metaKey||e.ctrlKey||e.altKey){releaseKeys();return;}const k=KMAP[e.code];if(!k)return;if(k===' '){e.preventDefault();if(!modalOpen&&!keys[' '])jump();}else if(e.code.startsWith('Arrow'))e.preventDefault();keys[k]=true;});
+addEventListener('keyup',e=>{const k=KMAP[e.code];if(e.key==='Meta'||e.key==='Control'||e.key==='Alt'){releaseKeys();return;}if(!k)return;keys[k]=false;if(k===' ')jumpHeld=false;});
+addEventListener('blur',releaseKeys);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeys();});
 // 아이패드: 버튼을 빠르게 연타해도 화면이 확대되지 않게(두 번 탭 확대·핀치 확대 막기)
 ['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
@@ -925,7 +931,7 @@ $('#acts').addEventListener('pointerdown',e=>{const b=e.target.closest('[data-a=
 function jump(){if(scene_==='play'){girl.buf=0.18;jumpHeld=true;}}
 function girlBlocked(x,z){if(outB(x,z))return true;for(const c of CL){if(Math.abs(x-c.x)<c.w/2+0.18&&Math.abs(z-c.z)<c.d/2+0.18&&c.top>girl.y+0.72&&!(c.bot!=null&&girl.y+1.5<c.bot))return true;}
   if(girl.y<4.2){for(const t of TREES)if(Math.hypot(x-t.x,z-t.z)<0.75)return true;for(const t of forestTrees)if(Math.hypot(x-t.x,z-t.z)<0.6)return true;}return false;}
-function updGirl(dt){let ix=joy.x,iy=joy.y;if(keys.w||keys.arrowup)iy=-1;if(keys.s||keys.arrowdown)iy=1;if(keys.a||keys.arrowleft)ix=-1;if(keys.d||keys.arrowright)ix=1;
+function updGirl(dt){let ix=joy.x,iy=joy.y;if(modalOpen)releaseKeys();if(keys.w)iy=-1;if(keys.s)iy=1;if(keys.a)ix=-1;if(keys.d)ix=1;if(keys.w&&keys.s)iy=0;if(keys.a&&keys.d)ix=0;
   const mag=Math.min(1,Math.hypot(ix,iy)),fw={x:-Math.sin(cam.yaw),z:-Math.cos(cam.yaw)},rt={x:Math.cos(cam.yaw),z:-Math.sin(cam.yaw)};let mx=0,mz=0;
   if(mag>0.1){mx=rt.x*ix-fw.x*iy;mz=rt.z*ix-fw.z*iy;const l=Math.hypot(mx,mz);mx/=l;mz/=l;girl.tx=null;}else if(girl.tx!=null){const dx=girl.tx-girl.x,dz=girl.tz-girl.z,d=Math.hypot(dx,dz);if(d<0.2)girl.tx=null;else{mx=dx/d;mz=dz/d;}}
   const sp=(girl.tx!=null?1:Math.pow(mag,1.4))*(inPond(girl.x,girl.z)?2.2:3.6);girl.moving=false;
