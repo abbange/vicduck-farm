@@ -164,8 +164,13 @@ let leaving=false;function save(){if(leaving)return;try{localStorage.setItem(KEY
 // 💾 저장: 이 기기(자동, 5초마다) + 클라우드(같은 Claude 계정으로 여는 모든 기기, 2분마다·저장 버튼)
 let lastCloud=0,cloudAcc=0;const hhmm=t=>{const d=new Date(t);return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');};
 const MYDEV=(()=>{try{let d=localStorage.getItem(KEY+'-dev');if(!d){d=Math.random().toString(36).slice(2,10);localStorage.setItem(KEY+'-dev',d);}return d;}catch(e){return 'x';}})();
-function cloudSave(){if(!DB||!S.started)return Promise.resolve(false);const at=Date.now();S.savedAt=at;save();return DB.doc('save/main').set({data:JSON.stringify(S),at,day:S.day,girl:S.girl||'',ducks:(S.ducks||[]).length,dev:MYDEV}).then(r=>{if(r===false)return false;lastCloud=at;return true;}).catch(()=>false);}
-function saveNow(show){save();S.savedAt=Date.now();save();cloudSave().then(ok=>{if(show)banner(ok?'💾 저장했어요! (이 기기 + 클라우드) '+hhmm(Date.now()):'💾 이 기기에 저장했어요 '+hhmm(Date.now()));});}
+let cloudBusy=false;
+async function cloudSave(){if(!DB||!S.started||cloudBusy)return false;cloudBusy=true;try{
+  // 다른 기기가 더 최근에 저장했으면 덮어쓰지 않아요(아이가 하던 게임을 부모 기기가 지우지 않게)
+  try{const sn=await DB.doc('save/main').get();const d=sn&&sn.exists?sn.data():null;if(d&&d.dev&&d.dev!==MYDEV&&d.at>(S.savedAt||0)+1000){if(!cloudWarned){cloudWarned=true;banner('☁️ 다른 기기에서 게임 중이라 이 기기 저장은 클라우드에 올리지 않아요');}return false;}}catch(e){}
+  const at=Date.now();S.savedAt=at;save();return await DB.doc('save/main').set({data:JSON.stringify(S),at,day:S.day,girl:S.girl||'',ducks:(S.ducks||[]).length,dev:MYDEV}).then(r=>{if(r===false)return false;lastCloud=at;return true;}).catch(()=>false);}finally{cloudBusy=false;}}
+let cloudWarned=false;
+function saveNow(show){save();cloudSave().then(ok=>{if(show)banner(ok?'💾 저장했어요! (이 기기 + 클라우드) '+hhmm(Date.now()):'💾 이 기기에 저장했어요 '+hhmm(Date.now()));});}
 function cloudTick(dt){cloudAcc+=dt;if(cloudAcc>120){cloudAcc=0;cloudSave();}}
 function cloudLoadCard(){if(!DB){modal('<p class="eyebrow">부모님 메뉴</p><h2>☁️ 불러오기</h2><p>지금 화면에서는 클라우드 저장소를 쓸 수 없어요. 게임 링크(claude.ai)로 열었을 때 쓸 수 있어요.</p>');return;}
   DB.doc('save/main').get().then(sn=>{const d=sn&&sn.exists?sn.data():null;if(!d||!d.data){modal('<p class="eyebrow">부모님 메뉴</p><h2>☁️ 불러오기</h2><p>클라우드에 저장된 게임이 아직 없어요.</p>');return;}
@@ -1338,7 +1343,7 @@ function modal(html,btns){if(modalOpen){mq.push([html,btns]);return;}$('#mBody')
   (btns||[{t:'좋아요'}]).forEach((b,i)=>{const e=document.createElement('button');e.type='button';e.textContent=b.t;e.className=b.cls||(i===0&&(btns||[]).length===1?'primary':'');if(b.dis)e.disabled=true;
     e.onclick=()=>{if(b.keep){b.fn&&b.fn(e);return;}closeModal(true);b.fn&&b.fn();nextModal();};mb.appendChild(e);});
   $('#modal').hidden=false;modalOpen=true;joy.on=false;joy.x=joy.y=0;knob.style.transform='';}
-function closeModal(noNext){$('#modal').hidden=true;modalOpen=false;if(!noNext)nextModal();}
+function closeModal(noNext){$('#modal').hidden=true;modalOpen=false;if(!noNext)nextModal();setTimeout(()=>{if(!S.started&&!modalOpen&&!leaving)welcome();},80);}
 function nextModal(){if(!modalOpen&&mq.length){const a=mq.shift();modal(a[0],a[1]);}}
 function fact(title,html){modal('<p class="eyebrow">오리 수첩</p><h2>'+title+'</h2>'+html);}
 let bTO=null;function banner(t){const b=$('#banner');b.textContent=t;b.hidden=false;b.style.animation='none';void b.offsetWidth;b.style.animation='';clearTimeout(bTO);bTO=setTimeout(()=>b.hidden=true,2600);}
@@ -1378,7 +1383,7 @@ function welcome(){const HAIR=[['pig','양갈래'],['bob','단발'],['long','긴
     '<p style="margin:10px 0 2px"><b>머리 모양</b></p><div class="opts" id="oH">'+HAIR.map(h=>'<button type="button" data-v="'+h[0]+'" aria-pressed="'+(S.hair===h[0])+'">'+h[1]+'</button>').join('')+'</div>'+
     '<p style="margin:8px 0 2px"><b>머리색</b></p><div class="opts" id="oC">'+HC.map(c=>'<button type="button" class="sw" data-v="'+c+'" aria-label="머리색" aria-pressed="'+(S.hairC===c)+'" style="background:'+c+'"></button>').join('')+'</div>'+
     '<p style="margin:8px 0 2px"><b>옷 색</b></p><div class="opts" id="oD">'+DR.map(c=>'<button type="button" class="sw" data-v="'+c+'" aria-label="옷 색" aria-pressed="'+(S.dress===c)+'" style="background:'+c+'"></button>').join('')+'</div>',
-    [...(sbOn()&&!famCode()?[{t:'☁️ 다른 기기 게임 이어하기',fn:()=>{familyCard();}}]:[]),{t:'농장 시작!',cls:'primary',keep:true,fn:()=>{const n=($('#inN').value||'').trim();if(!n){$('#inN').focus();$('#inN').placeholder='이름을 꼭 적어 줘';return;}
+    [...(sbOn()&&!famCode()?[{t:'☁️ 다른 기기 게임 이어하기',fn:()=>{familyCard();}}]:[]),...(famCode()?[{t:'👩 부모님 메뉴만 보기',fn:()=>pinGate(()=>{parentMenu();})}]:[]),{t:'농장 시작!',cls:'primary',keep:true,fn:()=>{const n=($('#inN').value||'').trim();if(!n){$('#inN').focus();$('#inN').placeholder='이름을 꼭 적어 줘';return;}
       const keep={hair:S.hair,hairC:S.hairC,dress:S.dress};closeModal(true);clearWorld();newGame();Object.assign(S,keep);S.girl=n.slice(0,8);S.duckName=(($('#inD').value||'').trim()||'뽀송이').slice(0,8);S.started=true;save();makeGirl();
       modal('<p class="eyebrow">시작하기</p><h2>농장이 이렇게 돌아가요</h2><p>🌾 밀을 심어 거두면 → 🌀 방앗간이 사료를 만들고 → 🍽️ 급식기가 오리에게 나눠 줘요.</p><p>🦆 오리가 건강하면 → 🪺 둥지에 알을 낳고 → 🏪 가게에서 팔아 🪙 코인을 벌어요. 알을 🐣 부화기에 넣으면 오리 가족이 늘어나요.</p><p>밥과 물은 건물이 알아서 챙겨요. 왼쪽 위 <b>목표</b>를 따라가 보세요!</p><p class="note">밤이 되면 🏡 우리 집을 눌러 잠자요. 🦆 줄서! 버튼을 누르면 오리들이 모두 따라와요.</p>',[{t:'좋아요!'}]);}}]);
   setTimeout(()=>{[['oH','hair'],['oC','hairC'],['oD','dress']].forEach(p=>document.querySelectorAll('#'+p[0]+' button').forEach(b=>b.onclick=()=>{S[p[1]]=b.dataset.v;document.querySelectorAll('#'+p[0]+' button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));makeGirl();}));},30);}
