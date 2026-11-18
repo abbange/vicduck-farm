@@ -633,7 +633,7 @@ function updPickups(dt){spawnT-=dt;if(spawnT<=0){spawnT=5;const c=t=>pickups.fil
     if(p.t==='egg'){S.eggs.push(p.breed||'pekin');S.res.egg++;cnt('egg');add('egg',0,p,1.2,'+1 🥚');}
     else if(p.gold){wordQuiz(p);}
     else{const n=p.t==='twig'||p.t==='rock'?2:1;add(p.t,n,p,1.2);cnt(p.t,n);if(p.t==='feather'&&!S.seen.molt){S.seen.molt=1;fact('털갈이 깃털','<p class="fact">오리는 해마다 깃털을 새로 갈아요(털갈이). 빠진 깃털은 주워서 둥지 만들기에 쓸 수 있어요.</p>');}}
-    if(Math.random()<0.07){add('gem',1,p,1.9,'+1 ✨');banner('반짝 돌을 찾았어요!');ching();}}}
+    if(Math.random()<0.15){add('gem',1,p,1.9,'+1 ✨');banner('반짝 돌을 찾았어요!');ching();}}}
   // 둥지 알 줍기
   byT('nest').forEach(b=>{if(b.tier===2||!b.st.eggs.length)return;const c=bCenter(b);if(Math.hypot(c.x-girl.x,c.z-girl.z)<1.3){const n=b.st.eggs.length;b.st.eggs.forEach(br=>S.eggs.push(br));S.res.egg+=n;cnt('egg',n);b.st.eggs=[];add('egg',0,c,1.3,'+'+n+' 🥚');pop();nestVis(b);}});}
 
@@ -997,7 +997,7 @@ function buildHTML(){const tab=BTABS.find(t=>t[0]===bTab);const list=tab[2].filt
 function bindBuild(){document.querySelectorAll('.tabs button').forEach(el=>el.onclick=()=>{bTab=el.dataset.tab;$('#mBody').innerHTML=buildHTML();bindBuild();});
   document.querySelectorAll('.item').forEach(el=>el.onclick=()=>{const t=el.dataset.t;if(!canPay(CAT[t].cost[0])){banner('재료가 모자라요. 🎒 가방에서 얻는 곳을 볼 수 있어요');return;}startPlace(t);});}
 function buildCard(){modal(buildHTML(),[{t:'닫기'}]);bindBuild();}
-const WHERE={coin:'알 가게, 목표, 영어 숙제, 침입자 쫓기, 보물상자, 아침 보너스',feed:'방앗간이 밀로 만들어요 · 상점',grain:'밀밭에서 거둬요',straw:'밀밭에서 거둬요 · 상점',egg:'둥지에서 주워요',twig:'농장 풀밭·나무 밑 반짝이는 곳(한 번에 2개) · 숲 땅 · 상점',rock:'농장 풀밭 반짝이는 곳(한 번에 2개) · 돌밭 땅 · 상점',feather:'오리가 털갈이로 떨어뜨려요',weed:'연못 위 반짝이는 곳',gem:'물건을 주울 때 가끔 · 보물상자 · 배지'};
+const WHERE={coin:'알 가게, 목표, 영어 숙제, 침입자 쫓기, 보물상자, 아침 보너스',feed:'방앗간이 밀로 만들어요 · 상점',grain:'밀밭에서 거둬요',straw:'밀밭에서 거둬요 · 상점',egg:'둥지에서 주워요',twig:'농장 풀밭·나무 밑 반짝이는 곳(한 번에 2개) · 숲 땅 · 상점',rock:'농장 풀밭 반짝이는 곳(한 번에 2개) · 돌밭 땅 · 상점',feather:'오리가 털갈이로 떨어뜨려요',weed:'연못 위 반짝이는 곳',gem:'물건을 주울 때 가끔(15%) · 상점에서 조약돌·나뭇가지·개구리밥으로 바꾸기 · 보물상자 · 배지'};
 function bagCard(){const G=[['농작물',['grain','straw','feed']],['오리가 주는 것',['egg','feather']],['줍는 재료',['twig','rock','weed']],['돈과 보물',['coin','gem']]];
   modal('<p class="eyebrow">🎒 가방</p><h2>내 물건</h2>'+G.map(g=>'<h3>'+g[0]+'</h3><div class="bag">'+g[1].map(k=>'<span class="e">'+RES[k][0]+'</span><b>'+RES[k][1]+' '+Math.floor(S.res[k]||0)+'</b><span class="w">'+WHERE[k]+'</span>').join('')+'</div>').join(''),[{t:'🥣 사료 얻는 법',fn:feedGuide},{t:'닫기'}]);}
 function feedGuide(){const m=byT('mill').length,f=byT('field').length;modal('<p class="eyebrow">오리 수첩</p><h2>🥣 사료 얻는 법</h2><ol><li>🌾 <b>밀밭</b>을 눌러 씨를 뿌려요'+(f?'':' <span class="res-no">(밀밭이 없어요!)</span>')+'</li><li>다 자라서 금빛이 되면 눌러서 거둬요 → 밀과 짚</li><li>🌀 <b>방앗간</b>이 밀 2개를 사료 3개로 저절로 바꿔요'+(m?'':' <span class="res-no">(방앗간을 지어요!)</span>')+'</li><li>🍽️ 급식기가 오리들에게 알아서 나눠 줘요</li></ol><p class="note">급할 땐 🛒 상점에서 사료 10개를 🪙15에 살 수 있어요. 밀밭을 2단계로 올리면 거둔 뒤 저절로 다시 심어요.</p><p>지금 창고 사료: <b>'+Math.floor(S.res.feed)+'개</b> · 밀 <b>'+Math.floor(S.res.grain)+'개</b></p>',[{t:'좋아요'}]);}
@@ -1043,10 +1043,10 @@ function shopCard(){const F=farm(),room=F.hc-F.n;const items=[
   {k:'runner',n:'🏃 인디언 러너 한 쌍',c:{coin:150},need:2,lock:!S.unlock.runner,fn:()=>{newDuck('runner','f',150);newDuck('runner','m',150);}},
   {k:'call',n:'🐣 콜덕 한 쌍',c:{coin:200},need:2,lock:!S.unlock.call,fn:()=>{newDuck('call','f',150);newDuck('call','m',150);}},
   {k:'musc',n:'❤️ 머스코비 한 쌍',c:{coin:250},need:2,lock:!S.unlock.muscovy,fn:()=>{newDuck('muscovy','f',150);newDuck('muscovy','m',150);}},
-  {k:'buyf',n:'🪶 깃털 5개',c:{coin:12},fn:()=>add('feather',5)},{k:'buyt',n:'🪵 나뭇가지 10개',c:{coin:10},fn:()=>add('twig',10)},{k:'buyr',n:'🪨 조약돌 10개',c:{coin:10},fn:()=>add('rock',10)},{k:'sellg',n:'🌾 밀 5개 팔기 → 🪙4',c:{grain:5},fn:()=>add('coin',4)},{k:'sells',n:'🟨 짚 5개 팔기 → 🪙3',c:{straw:5},fn:()=>add('coin',3)}];
+  {k:'buyf',n:'🪶 깃털 5개',c:{coin:12},fn:()=>add('feather',5)},{k:'buyt',n:'🪵 나뭇가지 10개',c:{coin:10},fn:()=>add('twig',10)},{k:'buyr',n:'🪨 조약돌 10개',c:{coin:10},fn:()=>add('rock',10)},{k:'gemr',n:'🪨 조약돌 15개 → ✨ 반짝 돌 1개',c:{rock:15},fn:()=>add('gem',1)},{k:'gemt',n:'🪵 나뭇가지 15개 → ✨ 반짝 돌 1개',c:{twig:15},fn:()=>add('gem',1)},{k:'gemw',n:'🍀 개구리밥 10개 → ✨ 반짝 돌 1개',c:{weed:10},fn:()=>add('gem',1)},{k:'sellg',n:'🌾 밀 5개 팔기 → 🪙4',c:{grain:5},fn:()=>add('coin',4)},{k:'sells',n:'🟨 짚 5개 팔기 → 🪙3',c:{straw:5},fn:()=>add('coin',3)}];
   if(S.gift&&S.gift.discount)items.forEach(it=>{if(it.c.coin){it.c=Object.assign({},it.c,{coin:Math.ceil(it.c.coin*0.8)});}});
   modal('<p class="eyebrow">상점 트럭'+(S.gift&&S.gift.discount?' · 🏷️ 20% 할인':'')+'</p><h2>무엇을 살까요?</h2><p class="src">오리집 빈자리: '+room+'마리</p><div class="tabs"><button type="button" id="toWard">🛍️ 오리 옷 가게</button></div><div class="grid">'+items.map((it,i)=>'<button type="button" class="item" data-i="'+i+'"'+(it.lock?' disabled':'')+'><span class="n">'+(it.lock?'🔒 ':'')+it.n+'</span>'+costHTML(it.c)+(it.lock?'<span class="d">아직 잠겨 있어요</span>':'')+'</button>').join('')+'</div>',[{t:'닫기'}]);
-  const tw=$('#toWard');if(tw)tw.onclick=()=>{closeModal(true);wardShop();};document.querySelectorAll('.item[data-i]').forEach(el=>el.onclick=()=>{const it=items[+el.dataset.i];if(it.lock)return;if(!canPay(it.c)){banner('재료가 모자라요');return;}if(it.need&&farm().hc-S.ducks.length<it.need){banner('오리집 자리가 모자라요. 오리집을 넓혀요');return;}twoTap(el,()=>{pay(it.c);it.fn();ching();save();closeModal(true);shopCard();banner(it.n+(it.k.startsWith('sell')?' 완료!':' 샀어요!'));});});}
+  const tw=$('#toWard');if(tw)tw.onclick=()=>{closeModal(true);wardShop();};document.querySelectorAll('.item[data-i]').forEach(el=>el.onclick=()=>{const it=items[+el.dataset.i];if(it.lock)return;if(!canPay(it.c)){banner('재료가 모자라요');return;}if(it.need&&farm().hc-S.ducks.length<it.need){banner('오리집 자리가 모자라요. 오리집을 넓혀요');return;}twoTap(el,()=>{pay(it.c);it.fn();ching();save();closeModal(true);shopCard();banner(it.n+(it.k.startsWith('sell')||it.k.startsWith('gem')?' 바꿨어요!':' 샀어요!'));});});}
 
 /* ================= 목표 ================= */
 const Q=[
@@ -1418,7 +1418,7 @@ let bTO=null;function banner(t){const b=$('#banner');b.textContent=t;b.hidden=fa
 $('#status').addEventListener('click',e=>{const g=e.target.closest('[data-g]');if(g&&g.dataset.g==='feed')feedGuide();});
 $('#bBag').onclick=()=>{ac();bagCard();};$('#bAv').onclick=()=>{ac();closetCard();};$('#bVoc').onclick=()=>{ac();vocabView();};$('#bHw').onclick=()=>{ac();if(scene_==='room'){hwStart();return;}modal('<p class="eyebrow">📚 숙제</p><h2>숙제는 공부방 책상에서 해요</h2><p>'+(S.hw&&!S.hw.done?'오늘 숙제가 있어요! 다 풀면 🪙 '+S.hw.reward:'우리 집에 들어가면 공부방이 있어요.')+'</p>',[{t:'🏠 공부방으로 가기',cls:'primary',fn:enterRoom},{t:'닫기'}]);};
 $('#bShop').onclick=()=>{ac();shopCard();};$('#bDex').onclick=()=>{ac();dexCard();};
-$('#bMenu').onclick=()=>{ac();modal('<p class="eyebrow">메뉴</p><h2>설정</h2><p class="src" style="float:right;margin-top:-34px">버전 1118d</p><p class="src">움직이기: 조이스틱·WASD·땅 누르기 · 점프: 버튼·스페이스 · 둘러보기: 화면 끌기 · 확대: 두 손가락·휠</p>',
+$('#bMenu').onclick=()=>{ac();modal('<p class="eyebrow">메뉴</p><h2>설정</h2><p class="src" style="float:right;margin-top:-34px">버전 1118e</p><p class="src">움직이기: 조이스틱·WASD·땅 누르기 · 점프: 버튼·스페이스 · 둘러보기: 화면 끌기 · 확대: 두 손가락·휠</p>',
   [{t:'💾 지금 저장하기',cls:'primary',fn:()=>saveNow(true)},{t:'👩 부모님 메뉴 (비밀번호)',fn:()=>pinGate(parentMenu)},...(S.inkOK?[{t:S.ink?'🖌 그림책 모드 끄기':'🖌 그림책 모드 켜기',fn:()=>{S.ink=!S.ink;save();banner(S.ink?'그림책 모드!':'원래 화면으로');}}]:[]),{t:SOFT?'🧱 블록(로블록스) 그래픽으로':'🧸 부드러운 3D 그래픽으로',fn:()=>{saveNow(false);try{localStorage.setItem(KEY+'-style',SOFT?'block':'soft');}catch(e){}setTimeout(()=>(leaving=true,location.reload()),400);}},{t:bgmOn?'🎵 배경음악 끄기':'🎵 배경음악 켜기',fn:()=>{bgmOn=!bgmOn;try{localStorage.setItem(KEY+'-bgm',bgmOn?'1':'0');}catch(e){}banner(bgmOn?'배경음악 켜짐':'배경음악 꺼짐');}},{t:muted?'🔈 소리 켜기':'🔇 소리 끄기',fn:()=>{muted=!muted;try{localStorage.setItem(KEY+'-mute',muted?'1':'0');}catch(e){}}},{t:'닫기'}]);};
 
 /* ================= 하늘 / 시간 ================= */
