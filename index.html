@@ -918,8 +918,8 @@ joyEl.addEventListener('pointermove',e=>{if(joy.on&&e.pointerId===joy.id)joyMove
 const KMAP={KeyW:'w',ArrowUp:'w',KeyS:'s',ArrowDown:'s',KeyA:'a',ArrowLeft:'a',KeyD:'d',ArrowRight:'d',Space:' '};
 const typingIn=e=>{const t=e.target;return t&&t.closest&&t.closest('input,textarea,select,[contenteditable]');};
 function releaseKeys(){Object.keys(keys).forEach(k=>keys[k]=false);jumpHeld=false;}
-addEventListener('keydown',e=>{if(typingIn(e))return;if(e.metaKey||e.ctrlKey||e.altKey){releaseKeys();return;}const k=KMAP[e.code];if(!k)return;if(k===' '){e.preventDefault();if(!modalOpen&&!keys[' '])jump();}else if(e.code.startsWith('Arrow'))e.preventDefault();keys[k]=true;});
-addEventListener('keyup',e=>{const k=KMAP[e.code];if(e.key==='Meta'||e.key==='Control'||e.key==='Alt'){releaseKeys();return;}if(!k)return;keys[k]=false;if(k===' ')jumpHeld=false;});
+addEventListener('keydown',e=>{if(typingIn(e))return;if(e.metaKey){releaseKeys();return;}const k=KMAP[e.code];if(!k)return;if(k===' '){e.preventDefault();if(!modalOpen&&!keys[' '])jump();}else if(e.code.startsWith('Arrow'))e.preventDefault();keys[k]=true;});
+addEventListener('keyup',e=>{const k=KMAP[e.code];if(e.key==='Meta'){releaseKeys();return;}if(!k)return;keys[k]=false;if(k===' ')jumpHeld=false;});
 addEventListener('blur',releaseKeys);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseKeys();});
 // 아이패드: 버튼을 빠르게 연타해도 화면이 확대되지 않게(두 번 탭 확대·핀치 확대 막기)
 ['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
@@ -949,7 +949,7 @@ const blob=new THREE.Mesh(new THREE.CircleGeometry(0.42,24),new THREE.MeshBasicM
 const cam={yaw:0,pitch:0.62,dist:MOBILE?13:11};const camPos=new THREE.Vector3(),camLook=new THREE.Vector3();let camInit=false;
 const ptrs=new Map();let pinch0=0,dist0=0;
 cv.addEventListener('pointerdown',e=>{ac();if(e.pointerType==='mouse'){ptrs.clear();pinch0=0;}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now(),rb:e.button!==0});try{cv.setPointerCapture(e.pointerId);}catch(_){}if(ptrs.size===2){const a=[...ptrs.values()];pinch0=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);dist0=cam.dist;}});
-cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;if(e.pointerType==='mouse'&&e.buttons===0){ptrs.delete(e.pointerId);pinch0=0;return;}const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
   if(ptrs.size===2){const a=[...ptrs.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(pinch0)cam.dist=clamp(dist0*pinch0/d,5,26);return;}cam.yaw-=dx*0.006;cam.pitch=clamp(cam.pitch+dy*0.004,0.2,1.3);});
 ['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,e=>{const p=ptrs.get(e.pointerId);ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=0;if(p&&n==='pointerup'&&e.button===0&&!p.rb&&Math.hypot(e.clientX-p.sx,e.clientY-p.sy)<10&&performance.now()-p.t<400)tap(e);}));
 // 마우스 오른쪽 버튼: 브라우저 메뉴가 뜨지 않게 막고, 끌면 카메라만 돌려요. 손을 떼거나 창을 벗어나면 누름 상태를 깨끗이 지워요
