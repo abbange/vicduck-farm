@@ -911,7 +911,7 @@ function updDucks(dt){const inV=inVil(),night=S.clock>=21*60||S.clock<6*60,house
 /* ================= 딸 이동 ================= */
 const joy={x:0,y:0,on:false,id:null},keys={};let jumpHeld=false;const joyEl=$('#joy'),knob=$('#knob');
 function joyMove(e){const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,mx=r.width*0.38;let dx=e.clientX-cx,dy=e.clientY-cy;const d=Math.hypot(dx,dy);if(d>mx){dx*=mx/d;dy*=mx/d;}joy.x=dx/mx;joy.y=dy/mx;knob.style.transform='translate('+dx+'px,'+dy+'px)';}
-joyEl.addEventListener('pointerdown',e=>{ac();joy.on=true;joy.id=e.pointerId;try{joyEl.setPointerCapture(e.pointerId);}catch(_){}joyMove(e);girl.tx=null;e.preventDefault();});
+joyEl.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;ac();joy.on=true;joy.id=e.pointerId;try{joyEl.setPointerCapture(e.pointerId);}catch(_){}joyMove(e);girl.tx=null;e.preventDefault();});
 joyEl.addEventListener('pointermove',e=>{if(joy.on&&e.pointerId===joy.id)joyMove(e);});
 ['pointerup','pointercancel','lostpointercapture'].forEach(n=>joyEl.addEventListener(n,e=>{if(e.pointerId!==joy.id)return;joy.on=false;joy.x=joy.y=0;knob.style.transform='';}));
 // 키보드: 한글 입력 상태·대소문자와 상관없이 물리 키(e.code)로 읽고, 창을 벗어나면 모두 놓은 것으로 처리(키가 눌린 채로 남아 저절로 걷는 문제 방지)
@@ -948,10 +948,15 @@ const blob=new THREE.Mesh(new THREE.CircleGeometry(0.42,24),new THREE.MeshBasicM
 /* ================= 카메라 / 입력 ================= */
 const cam={yaw:0,pitch:0.62,dist:MOBILE?13:11};const camPos=new THREE.Vector3(),camLook=new THREE.Vector3();let camInit=false;
 const ptrs=new Map();let pinch0=0,dist0=0;
-cv.addEventListener('pointerdown',e=>{ac();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now()});try{cv.setPointerCapture(e.pointerId);}catch(_){}if(ptrs.size===2){const a=[...ptrs.values()];pinch0=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);dist0=cam.dist;}});
+cv.addEventListener('pointerdown',e=>{ac();if(e.pointerType==='mouse'){ptrs.clear();pinch0=0;}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now(),rb:e.button!==0});try{cv.setPointerCapture(e.pointerId);}catch(_){}if(ptrs.size===2){const a=[...ptrs.values()];pinch0=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);dist0=cam.dist;}});
 cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
   if(ptrs.size===2){const a=[...ptrs.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(pinch0)cam.dist=clamp(dist0*pinch0/d,5,26);return;}cam.yaw-=dx*0.006;cam.pitch=clamp(cam.pitch+dy*0.004,0.2,1.3);});
-['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,e=>{const p=ptrs.get(e.pointerId);ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=0;if(p&&n==='pointerup'&&Math.hypot(e.clientX-p.sx,e.clientY-p.sy)<10&&performance.now()-p.t<400)tap(e);}));
+['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,e=>{const p=ptrs.get(e.pointerId);ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=0;if(p&&n==='pointerup'&&e.button===0&&!p.rb&&Math.hypot(e.clientX-p.sx,e.clientY-p.sy)<10&&performance.now()-p.t<400)tap(e);}));
+// 마우스 오른쪽 버튼: 브라우저 메뉴가 뜨지 않게 막고, 끌면 카메라만 돌려요. 손을 떼거나 창을 벗어나면 누름 상태를 깨끗이 지워요
+document.addEventListener('contextmenu',e=>{const t=e.target;if(t&&t.closest&&t.closest('input,textarea'))return;e.preventDefault();},{capture:true});
+function clearPtrs(){ptrs.clear();pinch0=0;if(joy.on){joy.on=false;joy.x=joy.y=0;knob.style.transform='';}}
+cv.addEventListener('lostpointercapture',e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=0;});
+addEventListener('blur',clearPtrs);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPtrs();});
 cv.addEventListener('wheel',e=>{cam.dist=clamp(cam.dist+e.deltaY*0.01,5,26);e.preventDefault();},{passive:false});
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),gplane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3();
 function tap(e){if(modalOpen||scene_==='room')return;const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
