@@ -23,6 +23,9 @@
 - 결과 보기: `select rec, at from duckfarm.results where code='<code>' order by at desc limit 20;`
 - 단어장: `vocab/current` = `{vocab:{id, words:[{en,ko}]}}` 형태(코드의 vocabEditor 참고).
 
+## 그래픽
+- 기본은 `SOFT`(부드러운 3D: softPerson/softDuck, 둥근 나무, 스터드 없는 바닥). 메뉴에서 블록(로블록스) 스타일로 전환, localStorage `duck-farm-v1-style`.
+
 ## 테스트
 - Playwright 크로미움: `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`, three.min.js는 로컬 npm 사본으로 route, 폰트 abort. `?fast=2`면 `window.__farm` 디버그 훅(go, setY, walk, simCourse, simPath, closetCard, addRes, setDay 등).
 - 수정 후 `<script>` 블록 문법 검사(new Function) → 스크린샷 → 커밋.
