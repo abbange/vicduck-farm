@@ -664,7 +664,7 @@ function spawnFoe(type){const a=Math.random()*6.28,n=type==='crow'?3:1;const F0=
 const CAT_FACT={crow:['🐦‍⬛ 까마귀 떼가 사료를 노려요!','까마귀 떼','까마귀들이 급식기의 사료를 쪼아 먹어요. 가까이 가서 쫓아내요!','까마귀는 영리해서 사료가 있는 곳을 금방 찾아내요. 실제 농장에서는 사료통에 뚜껑을 덮거나 그물을 쳐서 막아요.'],
   raccoon:['🦝 너구리가 둥지 쪽으로 살금살금!','밤손님 너구리','너구리가 둥지의 알을 가져가려고 해요. 알을 지켜요!','너구리는 주로 밤에 돌아다니며 알이나 어린 새를 노릴 수 있어요. 밤에는 오리를 문이 잘 닫히는 집에 두고, 울타리를 튼튼하게 해요.'],
   cat:['🐈 들고양이가 아기 오리를 쳐다봐요!','들고양이','들고양이가 아기 오리에게 다가가요. 얼른 쫓아내요!','고양이는 작은 새나 아기 오리를 사냥하려 할 수 있어요. 아기 오리는 어른 오리보다 훨씬 약해서 더 잘 지켜 줘야 해요.']};
-function foeTick(dt){foeT-=dt*FAST;if(foeT>0||S.day<2||foes.length||scene_!=='play')return;foeT=rnd(40,70);const h=S.clock/60;
+function foeTick(dt){if(inVil()){foeT=Math.max(foeT,30);return;}foeT-=dt*FAST;if(foeT>0||S.day<2||foes.length||scene_!=='play')return;foeT=rnd(40,70);const h=S.clock/60;
   const fs=byT('fence').reduce((s,b)=>s+b.tier+1,0),deter=1-Math.min(0.7,fs*0.03),opts=[];
   if(h>=8&&h<17&&byT('feeder').length&&S.res.feed>1)opts.push('crow');if(h>=18.5&&h<23.5)opts.push('raccoon');if(h>=8&&h<18&&ducks.some(r=>r.young&&r.m.g.visible))opts.push('cat');
   if(!opts.length)return;const type=opts[Math.floor(Math.random()*opts.length)];let p=0.6*deter;if(type==='crow')p*=1-Math.min(0.6,byT('scarecrow').length*0.3);if(type==='raccoon')p*=1-Math.min(0.6,byT('lamp').length*0.15);if(Math.random()<p)spawnFoe(type);}
@@ -910,7 +910,7 @@ const IPS=[{id:'toVil',x:20.2,z:0,r:2.4,t:'🚌 이웃 마을 가기'},{id:'toFa
   {id:'npc_grandma',x:NPCS.grandma.x,z:NPCS.grandma.z,r:3.2,t:'💬 순자 할머니'},{id:'npc_boy',x:NPCS.boy.x,z:NPCS.boy.z,r:3.2,t:'💬 목장 민준'},{id:'npc_merchant',x:NPCS.merchant.x,z:NPCS.merchant.z,r:3.2,t:'💬 시장 아저씨'}];
 function nearIP(){if(scene_!=='play'||place)return null;let best=null,bd=1e9;GATES.forEach(g=>{if(gateOpen(g)||Math.abs(girl.y-g.top)>0.4)return;const d=Math.hypot(girl.x-g.x,girl.z-g.z);if(d<2.4&&d<bd){bd=d;best={id:'gate:'+g.id,t:'🔑 '+g.label+' 문 열기'};}});if(best)return best;
   TREAS.forEach(t=>{if(S.treas&&S.treas[t.id]===S.day||girl.y>1)return;const d=Math.hypot(girl.x-t.x,girl.z-t.z);if(d<2.0&&d<bd){bd=d;best={id:'tr:'+t.id,t:'🗝️ 보물상자 열기'};}});if(best)return best;signs.forEach(sp=>{const d=Math.hypot(girl.x-sp.position.x,girl.z-sp.position.z);if(d<2.6&&d<bd){bd=d;best={id:'plot:'+sp.userData.plot,t:'🪧 이 땅 보기'};}});IPS.forEach(p=>{const d=Math.hypot(girl.x-p.x,girl.z-p.z);if(d<p.r&&d<bd){bd=d;best=p;}});return best;}
-function travel(to){if(scene_!=='play')return;parade=0;const f=$('#fade');f.textContent='🚌 부릉부릉…';f.classList.add('on');
+function travel(to){if(scene_!=='play')return;parade=0;if(to==='vil')foes.forEach(f=>{f.state='flee';f.t=0;if(f.m&&f.m.R&&f.m.R.ex)f.m.R.ex.visible=false;});const f=$('#fade');f.textContent='🚌 부릉부릉…';f.classList.add('on');
   setTimeout(()=>{if(to==='vil'){girl.x=VX-11.5;girl.z=1.8;}else{girl.x=18.5;girl.z=1.8;}girl.y=0;girl.vy=0;girl.yaw=to==='vil'?Math.PI/2:-Math.PI/2;seedTrail();girl.tx=null;
     const h=ducks.find(r=>r.d.hero);if(h){h.x=girl.x-1;h.z=girl.z;h.act=null;}camInit=false;f.classList.remove('on');setTimeout(()=>{f.textContent='쿨쿨… 좋은 꿈 꿔';},900);renderActs(true);
     if(to==='vil'){cnt('visit');if(!S.seen.village){S.seen.village=1;setTimeout(()=>fact('이웃 마을에 왔어요!','<p>할머니 닭 농장, 민준이네 목장, 마을 시장이 있어요. 이웃의 <b>부탁</b>을 들어주면 친해지고(❤️), 친해지면 특별한 선물을 줘요.</p><p class="note">부탁은 <b>영어</b>로 말할 때가 있어요. 🇰🇷 뜻 보기 없이 알아듣고 들어주면 보너스! 대장 오리만 따라와요. 다른 오리들은 농장에서 기다려요.</p>'),300);}}
@@ -1493,7 +1493,7 @@ let bTO=null;function banner(t){const b=$('#banner');b.textContent=t;b.hidden=fa
 $('#status').addEventListener('click',e=>{const g=e.target.closest('[data-g]');if(g&&g.dataset.g==='feed')feedGuide();});
 $('#bBag').onclick=()=>{ac();bagCard();};$('#bAv').onclick=()=>{ac();closetCard();};$('#bVoc').onclick=()=>{ac();vocabView();};$('#bHw').onclick=()=>{ac();if(scene_==='room'){hwStart();return;}modal('<p class="eyebrow">📚 숙제</p><h2>숙제는 공부방 책상에서 해요</h2><p>'+(S.hw&&!S.hw.done?'오늘 숙제가 있어요! 다 풀면 🪙 '+S.hw.reward:'우리 집에 들어가면 공부방이 있어요.')+'</p>',[{t:'🏠 공부방으로 가기',cls:'primary',fn:enterRoom},{t:'닫기'}]);};
 $('#bShop').onclick=()=>{ac();shopCard();};$('#bDex').onclick=()=>{ac();dexCard();};
-$('#bMenu').onclick=()=>{ac();modal('<p class="eyebrow">메뉴</p><h2>설정</h2><p class="src" style="float:right;margin-top:-34px">버전 1118f</p><p class="src">움직이기: 조이스틱·WASD·땅 누르기 · 점프: 버튼·스페이스 · 둘러보기: 화면 끌기 · 확대: 두 손가락·휠</p>',
+$('#bMenu').onclick=()=>{ac();modal('<p class="eyebrow">메뉴</p><h2>설정</h2><p class="src" style="float:right;margin-top:-34px">버전 1118g</p><p class="src">움직이기: 조이스틱·WASD·땅 누르기 · 점프: 버튼·스페이스 · 둘러보기: 화면 끌기 · 확대: 두 손가락·휠</p>',
   [{t:'💾 지금 저장하기',cls:'primary',fn:()=>saveNow(true)},{t:'👩 부모님 메뉴 (비밀번호)',fn:()=>pinGate(parentMenu)},...(S.inkOK?[{t:S.ink?'🖌 그림책 모드 끄기':'🖌 그림책 모드 켜기',fn:()=>{S.ink=!S.ink;save();banner(S.ink?'그림책 모드!':'원래 화면으로');}}]:[]),{t:SOFT?'🧱 블록(로블록스) 그래픽으로':'🧸 부드러운 3D 그래픽으로',fn:()=>{saveNow(false);try{localStorage.setItem(KEY+'-style',SOFT?'block':'soft');}catch(e){}setTimeout(()=>(leaving=true,location.reload()),400);}},{t:bgmOn?'🎵 배경음악 끄기':'🎵 배경음악 켜기',fn:()=>{bgmOn=!bgmOn;try{localStorage.setItem(KEY+'-bgm',bgmOn?'1':'0');}catch(e){}banner(bgmOn?'배경음악 켜짐':'배경음악 꺼짐');}},{t:muted?'🔈 소리 켜기':'🔇 소리 끄기',fn:()=>{muted=!muted;try{localStorage.setItem(KEY+'-mute',muted?'1':'0');}catch(e){}}},{t:'닫기'}]);};
 
 /* ================= 하늘 / 시간 ================= */
