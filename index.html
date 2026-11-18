@@ -555,7 +555,7 @@ function newDuck(b,sex,age,hero){const d={id:S.nid++,b,sex,age,hero:!!hero,healt
 function addDuckR(d){const r={d,m:makeDuck(d),x:0,z:0,yaw:Math.random()*6,wt:0,tx:0,tz:0,act:null,inside:false,featherT:rnd(60,140),sitT:0};const h=byT('duckhouse')[0];const c=h?bCenter(h):{x:0,z:0};r.x=c.x+rnd(-2,2);r.z=c.z+rnd(1.5,3);duckLook(r);ducks.push(r);return r;}
 
 /* ================= 처음 시작 ================= */
-function newGame(){S=DEF();plotSet=new Set(S.plots);refreshPlots();addB('home',5,5);addB('duckhouse',10,5);addB('feeder',9,9);addB('water',10,9);addB('field',5,10);addB('mill',8,11);
+function newGame(){S=DEF();if(typeof applyPush==='function')setTimeout(applyPush,0);plotSet=new Set(S.plots);refreshPlots();addB('home',5,5);addB('duckhouse',10,5);addB('feeder',9,9);addB('water',10,9);addB('field',5,10);addB('mill',8,11);
   newDuck('pekin','f',146,true);newDuck('pekin','f',158);newDuck('pekin','m',165);newDuck('pekin','f',24);const c=bCenter(S.bld[0]);girl.x=c.x;girl.z=c.z+3;seedTrail();}
 
 /* ================= 농장 톱니바퀴 ================= */
@@ -1336,6 +1336,9 @@ $('#mini').addEventListener('click',()=>{ac();mapCard();});
 const GOLDN={twig:'황금 나뭇가지',rock:'황금 조약돌',weed:'황금 개구리밥',feather:'황금 깃털'};
 const STARTER={id:'starter',words:[['duck','오리'],['egg','알'],['feather','깃털'],['farm','농장'],['pond','연못'],['wheat','밀'],['nest','둥지'],['house','집'],['water','물'],['grass','풀'],['tree','나무'],['feed','사료']].map(w=>({en:w[0],ko:w[1]}))};
 if(!S.vocab)S.vocab=STARTER;
+const PUSH_VOCAB={id:1795046400000,title:'Module 4 Week 1',words:[['knowledge','지식'],['posts','교역소 (개척길의 요새·물건 사는 곳)'],['hardships','고난, 어려움'],['patriotic','애국하는'],['slogans','구호, 슬로건'],['handy','편리한, 아주 쓸모 있는'],['typical','보통의, 전형적인'],['consisted','~로 이루어져 있었다']].map(w=>({en:w[0],ko:w[1]}))};
+function applyPush(){if(S.vocabPush===PUSH_VOCAB.id)return;const old=(S.vocab&&S.vocab.id!=='starter'&&S.vocab.words)||[],have=new Set(PUSH_VOCAB.words.map(w=>w.en.toLowerCase()));S.vocab={id:PUSH_VOCAB.id,words:PUSH_VOCAB.words.concat(old.filter(w=>!have.has((w.en||'').toLowerCase())))};S.vocabPush=PUSH_VOCAB.id;try{save();}catch(e){}setTimeout(()=>{try{banner('📖 새 단어 '+PUSH_VOCAB.words.length+'개가 단어장에 들어왔어요!');}catch(e){}},2500);}
+applyPush();
 function vocabView(){vocabReady();const W=(S.vocab&&S.vocab.words)||[],st=S.vstat||{};
   modal('<p class="eyebrow">📖 내 단어장 · '+W.length+'개</p><h2>외우는 단어</h2><p class="src">농장에서 <b>✨황금 물건</b>을 주우면 이 단어들이 문제로 나와요. 맞히면 물건이 5배가 돼요. 단어를 누르면 발음을 들을 수 있어요.</p>'+(S.vocab&&S.vocab.id==='starter'?'<p class="note">지금은 연습용 농장 단어예요. 부모님이 ☰ 메뉴 → 외우는 단어장에서 진짜 외우는 단어로 바꿔 줄 거예요.</p>':'')+
     '<div class="bag" id="vList">'+W.map((w,i)=>{const v=st[w.en]||{c:0,w:0};return '<span class="e">'+(v.w>v.c?'🔴':v.c||v.w?(v.w?'🟡':'🟢'):'⚪')+'</span><b><button type="button" data-i="'+i+'" style="font:inherit;font-weight:600;border:0;background:none;padding:0;cursor:pointer;color:var(--blue)">'+esc(w.en)+' 🔊</button></b><span class="w">'+esc(w.ko)+(v.c||v.w?' · ⭕'+v.c+' ❌'+v.w:'')+'</span>';}).join('')+'</div>',
