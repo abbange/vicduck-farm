@@ -24,6 +24,12 @@ button,.chip,.btn,.hud,.bar,.acts,#acts{touch-action:manipulation}#acts .btn,.jo
 .chip.bump{transform:scale(1.18)}
 .chip.dark{background:var(--dark);color:#fff;box-shadow:none}
 .chip.warn{background:#FFE0DC;color:#B42318}
+.chip.warn.foe{background:#E5483B;color:#fff;font-weight:700;animation:pulse .7s ease-in-out infinite}
+.foeedge{position:fixed;inset:0;pointer-events:none;z-index:4}.foeedge.on{animation:foeflash .9s ease-in-out 3}
+@keyframes foeflash{50%{box-shadow:inset 0 0 90px 34px rgba(255,40,40,.6)}}
+.foearrow{position:fixed;left:0;top:0;z-index:6;pointer-events:none;width:62px;height:62px;margin:-31px 0 0 -31px;display:none;align-items:center;justify-content:center;border-radius:50%;background:rgba(229,72,59,.95);font-size:30px;box-shadow:0 0 0 4px #fff,0 4px 14px rgba(0,0,0,.35)}
+.foearrow .tip{position:absolute;left:50%;top:50%;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:20px solid #E5483B;margin:-10px 0 0 -13px;transform-origin:13px 10px}
+body.inroom .foearrow{display:none!important}
 button.chip{border:0;font:inherit;font-size:15px;cursor:pointer;color:var(--ink)}
 .status{display:flex;gap:6px;flex-wrap:wrap}
 .quest{pointer-events:auto;align-self:flex-start;background:var(--dark);color:#fff;border-radius:12px;padding:7px 11px;max-width:min(330px,70vw);font-size:14px;line-height:1.35;
@@ -139,6 +145,7 @@ body.inroom .status,body.inroom .quest,body.inroom .mini,body.inroom .joy{displa
     <div class="acts" id="acts"></div>
   </div>
 </div>
+<div class="foeedge" id="foeEdge"></div><div class="foearrow" id="foeArr"><div class="tip" id="foeTip"></div><span id="foeE"></span></div>
 <div class="fade" id="fade">쿨쿨… 좋은 꿈 꿔</div>
 <div id="modal" class="modal" hidden><div class="card" role="dialog" aria-modal="true"><div id="mBody"></div><div id="mBtns" class="mbtns"></div></div></div>
 
@@ -674,12 +681,13 @@ function foeModel(type){const g=new THREE.Group(),b=new THREE.Group();g.add(b);c
   else{const o=P('#F0A04B'),w=P('#FFF4E6'),dk=P('#C8762A');box(b,[0.45,0.42,0.9],[0,0.48,0],o);box(b,[0.42,0.4,0.4],[0,0.7,0.55],o);box(b,[0.1,0.16,0.08],[0.13,0.96,0.55],o);box(b,[0.1,0.16,0.08],[-0.13,0.96,0.55],o);box(b,[0.22,0.12,0.06],[0,0.62,0.76],w);
     box(b,[0.08,0.1,0.03],[0.1,0.76,0.76],P('#3C8A3C'));box(b,[0.08,0.1,0.03],[-0.1,0.76,0.76],P('#3C8A3C'));R.tail=box(b,[0.1,0.1,0.6],[0,0.72,-0.65],dk,[0.7,0,0]);
     R.legs=[];[[0.15,0.28],[-0.15,0.28],[0.15,-0.28],[-0.15,-0.28]].forEach(p=>{const l=new THREE.Group();l.position.set(p[0],0.27,p[1]);b.add(l);box(l,[0.12,0.27,0.12],[0,-0.13,0],o);R.legs.push(l);});}
-  const ex=textSprite('!',{w:1.4,color:'#FFD23F',font:'bold 110px system-ui, sans-serif'});ex.position.y=R.exY||1.6;g.add(ex);R.ex=ex;scene.add(g);return{g,b,R};}
+  const ex=textSprite('!',{w:2.1,color:'#FFD23F',font:'bold 110px system-ui, sans-serif'});ex.position.y=R.exY||1.6;g.add(ex);R.ex=ex;
+  R.ring=new THREE.Mesh(new THREE.RingGeometry(0.72,1.0,36),new THREE.MeshBasicMaterial({color:0xFF2020,fog:false,toneMapped:false,side:THREE.DoubleSide,depthWrite:false}));R.ring.rotation.x=-Math.PI/2;R.ring.position.y=0.06;R.ring.renderOrder=3;g.add(R.ring);scene.add(g);return{g,b,R};}
 function spawnFoe(type){const a=Math.random()*6.28,n=type==='crow'?3:type==='wolf'?2:1;const F0=CAT_FACT[type];
   for(let i=0;i<n;i++){const f={type,m:foeModel(type),x:Math.cos(a)*25+rnd(-2,2),z:Math.sin(a)*25+rnd(-2,2),y:type==='crow'?8:0,yaw:0,hp:type==='crow'?2:type==='cat'?3:type==='wolf'?6:4,state:'come',t:0,moving:false};
     if(type==='crow'){const fd=byT('feeder'),b=fd[Math.floor(Math.random()*fd.length)],c=bCenter(b),aa=i*2.1;f.tgt={x:c.x+Math.cos(aa)*0.6,z:c.z+Math.sin(aa)*0.6};}
     foes.push(f);}
-  banner(F0[0]);thunk();if(!S.seen['foe_'+type]){S.seen['foe_'+type]=1;setTimeout(()=>fact(F0[1],'<p>'+F0[2]+'</p><p class="fact">'+F0[3]+'</p><p class="src">게임 규칙: 가까이 가서 👏 쫓아내기를 누르거나, 옆에서 점프하면 놀라요. 다 큰 오리 3마리 이상이 옆에 있으면 함께 꽥꽥거려서 두 배로 잘 쫓아내요. 울타리와 가로등이 많으면 덜 와요. 상점에서 💦 물총을 사면 멀리서도 쏴서 쫓아낼 수 있어요.'+(type==='wolf'?' 늑대는 힘이 세서 여러 번 맞혀야 해요.':'')+'</p>'),300);}
+  banner(F0[0]);thunk();foeAlarm();if(!S.seen['foe_'+type]){S.seen['foe_'+type]=1;setTimeout(()=>fact(F0[1],'<p>'+F0[2]+'</p><p class="fact">'+F0[3]+'</p><p class="src">게임 규칙: 가까이 가서 👏 쫓아내기를 누르거나, 옆에서 점프하면 놀라요. 다 큰 오리 3마리 이상이 옆에 있으면 함께 꽥꽥거려서 두 배로 잘 쫓아내요. 울타리와 가로등이 많으면 덜 와요. 상점에서 💦 물총을 사면 멀리서도 쏴서 쫓아낼 수 있어요.'+(type==='wolf'?' 늑대는 힘이 세서 여러 번 맞혀야 해요.':'')+'</p>'),300);}
   renderActs(true);}
 const CAT_FACT={crow:['🐦‍⬛ 까마귀 떼가 사료를 노려요!','까마귀 떼','까마귀들이 급식기의 사료를 쪼아 먹어요. 가까이 가서 쫓아내요!','까마귀는 영리해서 사료가 있는 곳을 금방 찾아내요. 실제 농장에서는 사료통에 뚜껑을 덮거나 그물을 쳐서 막아요.'],
   raccoon:['🦝 너구리가 둥지 쪽으로 살금살금!','밤손님 너구리','너구리가 둥지의 알을 가져가려고 해요. 알을 지켜요!','너구리는 주로 밤에 돌아다니며 알이나 어린 새를 노릴 수 있어요. 밤에는 오리를 문이 잘 닫히는 집에 두고, 울타리를 튼튼하게 해요.'],
@@ -689,6 +697,13 @@ function foeTick(dt){if(inVil()){foeT=Math.max(foeT,30);return;}foeT-=dt*FAST;if
   const fs=byT('fence').reduce((s,b)=>s+b.tier+1,0),deter=1-Math.min(0.7,fs*0.03),opts=[];
   if(h>=8&&h<17&&byT('feeder').length&&S.res.feed>1)opts.push('crow');if(h>=18.5&&h<23.5)opts.push('raccoon');if(S.day>=3&&h>=19&&h<23.5&&ducks.some(r=>!r.young&&r.m.g.visible))opts.push('wolf');if(h>=8&&h<18&&ducks.some(r=>r.young&&r.m.g.visible))opts.push('cat');
   if(!opts.length)return;const type=opts[Math.floor(Math.random()*opts.length)];let p=0.6*deter;if(type==='crow')p*=1-Math.min(0.6,byT('scarecrow').length*0.3);if(type==='raccoon'||type==='wolf')p*=1-Math.min(0.6,byT('lamp').length*0.15);if(Math.random()<p)spawnFoe(type);}
+function foeAlarm(){const e=$('#foeEdge');e.classList.remove('on');void e.offsetWidth;e.classList.add('on');[0,0.32,0.64].forEach(d=>{tone('square',880,660,0.16,0.05,d);tone('square',660,880,0.14,0.04,d+0.16);});try{if(navigator.vibrate)navigator.vibrate([150,80,150]);}catch(_){}}
+const FOE_E={crow:'🐦‍⬛',raccoon:'🦝',cat:'🐈',wolf:'🐺'},_fv=new THREE.Vector3();
+function foeArrowTick(){const el=$('#foeArr');let best=null,bd=1e9;if(scene_==='play'&&!inVil())foes.forEach(f=>{if(f.state==='flee')return;const d=Math.hypot(f.x-girl.x,f.z-girl.z);if(d<bd){bd=d;best=f;}});
+  if(!best){if(el.style.display!=='none')el.style.display='none';return;}_fv.set(best.x,(best.y||0)+0.6,best.z).project(camera);let x=_fv.x,y=_fv.y;const behind=_fv.z>1;if(behind){x=-x;y=-y;}
+  if(!behind&&Math.abs(x)<0.88&&Math.abs(y)<0.82){el.style.display='none';return;}const m=Math.max(Math.abs(x)/0.86,Math.abs(y)/0.78)||1;x/=m;y/=m;
+  const W=innerWidth,H=innerHeight,px=(x+1)/2*W,py=(1-y)/2*H;el.style.display='flex';el.style.transform='translate('+px+'px,'+py+'px) scale('+(1+0.08*Math.sin(T*8))+')';
+  $('#foeTip').style.transform='rotate('+Math.atan2(x,y)+'rad) translateY(-38px)';const fe=$('#foeE');if(fe.textContent!==FOE_E[best.type])fe.textContent=FOE_E[best.type];}
 function foeNear(){return foes.some(f=>f.state!=='flee'&&Math.hypot(f.x-girl.x,f.z-girl.z)<4.5);}
 function shoo(){if(!foes.some(f=>f.state!=='flee'))return;clapT=0.5;tone('square',900,500,0.06,0.08);tone('square',900,500,0.06,0.08,0.12);burst(girl.x,2.3,girl.z,'👏');
   const helpers=ducks.filter(r=>r.m.g.visible&&!r.young&&Math.hypot(r.x-girl.x,r.z-girl.z)<6),pow=helpers.length>=3?2:1;helpers.slice(0,5).forEach(r=>{burst(r.x,r.h+0.4,r.z,'꽥!');r.flapT=0.9;});if(helpers.length)quack(helpers[0].d.b);
@@ -717,7 +732,7 @@ function updFoes(dt){for(let i=foes.length-1;i>=0;i--){const f=foes[i],m=f.m;f.t
   m.g.position.set(f.x,f.y||0,f.z);m.g.rotation.y=f.yaw;
   if(f.type==='crow'){const fl=f.state==='act'&&f.y<0.1?0.1:Math.sin(T*18)*0.8;m.R.wl.rotation.z=fl;m.R.wr.rotation.z=-fl;if(f.state==='act')m.b.rotation.x=Math.sin(T*8+i)>0.3?0.4:0;}
   else{const w=f.moving?Math.sin(T*(f.state==='flee'?18:10)):0;m.R.legs.forEach((l,k)=>l.rotation.x=(k%2?-1:1)*w*0.7);if(m.R.tail)m.R.tail.rotation.y=Math.sin(T*3)*0.4;}
-  m.R.ex.position.y=(m.R.exY||1.6)+Math.sin(T*6)*0.08;}}
+  m.R.ex.position.y=(m.R.exY||1.6)+Math.sin(T*6)*0.08;const rg=m.R.ring;if(rg){rg.visible=f.state!=='flee';const k=1+0.25*Math.sin(T*7);rg.scale.set(k*(f.type==='wolf'?1.3:1),k*(f.type==='wolf'?1.3:1),1);rg.position.y=(-(f.y||0)+0.06)/m.g.scale.y;}}}
 
 
 /* ================= 💦 물총 ================= */
@@ -1750,7 +1765,7 @@ function statusTick(){badgeTick();if(scene_!=='room'){if(inVil())drawVillageMap(
   if(F.hc<F.n)w.push('<span class="chip warn">🛖 오리집이 비좁아요</span>');if(S.clean<40)w.push('<span class="chip warn">🧹 깔짚이 더러워요</span>');
   const ne=byT('nest').reduce((s,b)=>s+(b.tier<2?b.st.eggs.length:0),0)+pickups.filter(p=>p.t==='egg').length;if(ne)w.push('<span class="chip">🥚 주울 알 '+ne+'개</span>');
   const ripe=byT('field').filter(b=>b.st.stage==='ripe').length;if(ripe)w.push('<span class="chip">🌾 거둘 밭 '+ripe+'곳</span>');if(byT('field').some(b=>b.st.stage==='empty'))w.push('<span class="chip">🌱 빈 밭이 있어요</span>');
-  foes.filter(f=>f.state!=='flee').slice(0,1).forEach(f=>w.push('<span class="chip warn">'+({crow:'🐦‍⬛ 까마귀가 사료를 먹어요!',raccoon:'🦝 너구리가 알을 노려요!',cat:'🐈 고양이가 아기 오리를 노려요!',wolf:'🐺 늑대가 오리를 쫓아요!'})[f.type]+'</span>'));
+  foes.filter(f=>f.state!=='flee').slice(0,1).forEach(f=>w.push('<span class="chip warn foe">'+({crow:'🐦‍⬛ 까마귀가 사료를 먹어요!',raccoon:'🦝 너구리가 알을 노려요!',cat:'🐈 고양이가 아기 오리를 노려요!',wolf:'🐺 늑대가 오리를 쫓아요!'})[f.type]+'</span>'));
   if(sIdx()===3&&byT('field').length)w.push('<span class="chip">❄️ 겨울: 밀이 쉬어요</span>');
   if(S.clock>=20*60)w.unshift('<span class="chip warn">🌙 '+(inVil()?'버스 타고 농장으로 돌아가요':'집에 가서 자요')+'</span>');const fw=w.filter(x=>x.includes('foe')||x.includes('🐦')||x.includes('🦝')||x.includes('🐈'));
   $('#status').innerHTML='<span class="chip dark">🦆 '+F.n+'마리 · 건강 '+Math.round(F.avg)+'%</span>'+w.slice(0,3).join('');
@@ -1786,7 +1801,7 @@ addEventListener('resize',resize);
 let last=performance.now(),uiAcc=0,saveAcc=0;
 function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;T+=dt;
   hwAlarmTick(dt);if(scene_==='room'){roomTick(dt);updPops(dt);renderer.render(roomScene,roomCam);uiAcc+=dt;if(uiAcc>0.3){uiAcc=0;statusTick();}requestAnimationFrame(loop);return;}
-  if(!modalOpen&&!document.hidden&&scene_==='play'){updGirl(dt);tick(dt);updDucks(dt);updPickups(dt);vocabTick(dt);updVillage(dt);movTick(dt);foeTick(dt);updFoes(dt);gunTick(dt);visitTick();variantTick();chestTick();skyTick();goalTick();gateTick();airTick();treasTick();avFxTick(dt);
+  if(!modalOpen&&!document.hidden&&scene_==='play'){updGirl(dt);tick(dt);updDucks(dt);updPickups(dt);vocabTick(dt);updVillage(dt);movTick(dt);foeTick(dt);updFoes(dt);foeArrowTick();gunTick(dt);visitTick();variantTick();chestTick();skyTick();goalTick();gateTick();airTick();treasTick();avFxTick(dt);
     if(parade&&paradeAuto){parade-=dt;if(parade<=0){parade=0;renderActs(true);}}
     if(!parade&&S.paraded===0&&S.clock>9*60&&S.clock<17*60&&ducks.length>=4&&Math.random()<dt*0.02)startParade(true);
     S.bld.forEach(b=>{if(b.t==='windmill'){const r=bldR.get(b.id);if(r&&r.R.hub)r.R.hub.rotation.z-=dt*1.5;}});byT('water').forEach(b=>{const r=bldR.get(b.id);if(r.R.jet)r.R.jet.scale.y=0.5+Math.sin(T*6)*0.15;});
