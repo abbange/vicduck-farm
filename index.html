@@ -371,7 +371,7 @@ const extraPlots=()=>Math.max(0,plotSet.size-16);
 const rwTxt=r=>Object.keys(r).map(k=>RES[k][0]+r[k]).join(' ');
 function plotRewards(){const n=extraPlots();let got=[];PLOT_RW.forEach(([m,r])=>{if(n>=m&&(S.plotRw||0)<m){Object.keys(r).forEach(k=>add(k,r[k]));S.plotRw=m;got.push(m+'칸: '+rwTxt(r));}});
   if(got.length){ching();setTimeout(()=>fact('🎁 땅 넓히기 보상','<p>농장이 '+n+'칸 넓어졌어요!</p><p>'+got.join('<br>')+'</p>'),900);}}
-function plotPrice(){const n=Math.max(0,plotSet.size-16);return{coin:Math.round(40*Math.pow(1.45,n)),twig:3+n,rock:3+n};}
+function plotPrice(){const n=Math.max(0,plotSet.size-16);return{coin:Math.round(40*Math.pow(1.25,n)),twig:3+n,rock:3+n};}
 const gOwnM=studM('#5DB653',[PL*2,PL*2]),gWildM=studM('#3E8E3B',[PL*2,PL*2]);
 const plotR={};let signs=[],forestTrees=[];
 function plotC(x,z){return{x:(x*PL+PL/2)*TILE-HALF,z:(z*PL+PL/2)*TILE-HALF};}
@@ -828,6 +828,16 @@ C4.forEach(o=>plat(...o));MOV.forEach(p=>{if(p.c.top>=13&&p.kind==='drop')p.fast
 const G4={x:-8.6,z:-16.0,top:16.8};plat(G4.x,G4.z,G4.top,3.4,3.4,'#C9F2FF');
 [[-1.5,-1.5],[1.5,-1.5],[-1.5,1.5],[1.5,1.5]].forEach(q=>{mesh(CONE,scene,[0.5,1.4,0.5],[G4.x+q[0],G4.top+0.7,G4.z+q[1]],P('#7AD3FF',{metalness:.3,roughness:.2}));mesh(SPH2,scene,[0.22,0.22,0.22],[G4.x+q[0],G4.top+1.55,G4.z+q[1]],glowM('#B9F2FF'));});
 [['💎 도전 코스 4 (어려움)',16.0,15.0,-10.0],['💎 보석 탑',G4.x,G4.top+2.8,G4.z]].forEach(q=>{const t=textSprite(q[0],{w:3.4,color:'#B9F2FF'});t.position.set(q[1],q[2],q[3]);scene.add(t);});
+// ===== 🛝 보석 탑 미끄럼틀: 꼭대기 서쪽 끝에서 나선으로 빙글빙글 땅까지 =====
+const SLIDE=(()=>{const cx=G4.x-4.0,cz=G4.z,R=2.3,turns=5,top=G4.top,low=0.35,pts=[];const n=turns*28;
+  for(let i=0;i<=n;i++){const t=i/n,a=-t*turns*Math.PI*2;pts.push(new THREE.Vector3(cx+R*Math.cos(a),lerp(top,low,t),cz+R*Math.sin(a)));}
+  const e=pts[pts.length-1];pts.push(new THREE.Vector3(e.x,0.2,e.z-1.6),new THREE.Vector3(e.x,0.05,e.z-3.0));
+  const curve=new THREE.CatmullRomCurve3(pts),L=curve.getLength(),M=Math.round(L/0.6),cols=['#FF5A5A','#FF9F1C','#FFD23F','#3DBA54','#2D8CE6','#9B59D0'];
+  for(let i=0;i<M;i++){const a=curve.getPointAt(i/M),b=curve.getPointAt((i+1)/M),g=new THREE.Group();g.position.copy(a).add(b).multiplyScalar(0.5);g.lookAt(b);scene.add(g);const len=a.distanceTo(b)+0.04,col=P(cols[Math.floor(i/6)%6]);
+    box(g,[1.0,0.08,len],[0,-0.06,0],col);box(g,[0.08,0.32,len],[0.5,0.08,0],P('#FFFFFF'));box(g,[0.08,0.32,len],[-0.5,0.08,0],P('#FFFFFF'));}
+  mesh(CYL,scene,[0.28,top+0.4,0.28],[cx,(top+0.4)/2,cz],P('#F8F6F0'));mesh(SPH2,scene,[0.5,0.5,0.5],[cx,top+0.7,cz],P('#FF8FB1'));OBBY.push({x:cx,z:cz,w:0.6,d:0.6,top:top+0.9});
+  const tg=textSprite('🛝 미끄럼틀',{w:2.6,color:'#FFE38A'});tg.position.set(G4.x-1.9,top+1.5,G4.z);scene.add(tg);
+  return{curve,L,sx:pts[0].x,sz:pts[0].z,top};})();
 // 🎲 날마다 새로 만드는 코스 2~4용 여분 블록 (평소엔 숨겨 둬요)
 const EXB={2:[],3:[],4:[]};[2,3,4].forEach(k=>{for(let i=0;i<3;i++){const c=plat(0,0,1,1,1,'#FFFFFF','static');c.top=-99;c.bot=-99.5;const p=MOV[MOV.length-1];p.m.visible=false;p.extra=true;EXB[k].push(XTRA[XTRA.length-1]);}});
 // ===== 🔑 지식 열쇠 문: 열쇠 1개로 그날 하루 열려요 =====
@@ -1180,6 +1190,9 @@ function updGirl(dt){let ix=joy.x,iy=joy.y;if(modalOpen)releaseKeys();if(keys.w)
   if(mx||mz){let nx=girl.x+mx*sp*dt,nz=girl.z+mz*sp*dt;if(girlBlocked(nx,nz)){if(!girlBlocked(nx,girl.z))nz=girl.z;else if(!girlBlocked(girl.x,nz))nx=girl.x;else{nx=girl.x;nz=girl.z;girl.tx=null;}}
     if(nx!==girl.x||nz!==girl.z)girl.moving=true;girl.x=nx;girl.z=nz;girl.yaw+=angDiff(girl.yaw,Math.atan2(mx,mz))*Math.min(1,dt*12);}
   const gnd=groundAt(girl.x,girl.z,girl.y),wasAir=girl.y>gnd+0.02;if(!wasAir)girl.coy=0.16;else girl.coy=(girl.coy||0)-dt;girl.buf=(girl.buf||0)-dt;if(girl.buf>0&&girl.coy>0){girl.vy=7.4;girl.buf=0;girl.coy=0;girl.cut=false;tone('square',300,600,0.12,0.05);}if(girl.vy>4.5&&!jumpHeld&&!girl.cut){girl.vy=4.5;girl.cut=true;}girl.vy-=(girl.vy<0?21:18)*dt;girl.y+=girl.vy*dt;if(girl.y<=gnd){girl.y=gnd;if(wasAir&&girl.vy<-2&&foeNear())shoo();if(wasAir&&(girl.airTop||0)>7&&gnd<0.6)fellDown();girl.vy=0;}girl.gnd=gnd;if(girl.y>gnd+0.02)girl.airTop=Math.max(girl.airTop||0,girl.y);else girl.airTop=0;const air=girl.y>gnd+0.02;
+  if(!girl.slide&&scene_==='play'&&Math.abs(girl.y-SLIDE.top)<0.05&&girl.x<SLIDE.sx+0.35&&Math.abs(girl.z-SLIDE.sz)<0.6){girl.slide={s:0,v:2};tone('sine',500,1400,0.5,0.06);banner('🛝 슝~!');cnt('slide');}
+  if(girl.slide){const sl=girl.slide;sl.v=Math.min(8,sl.v+5*dt);sl.s+=sl.v*dt;const u=Math.min(1,sl.s/SLIDE.L),q=SLIDE.curve.getPointAt(u),tg=SLIDE.curve.getTangentAt(u);girl.x=q.x;girl.z=q.z;girl.y=q.y+0.04;girl.vy=0;girl.airTop=0;girl.tx=null;girl.yaw=Math.atan2(tg.x,tg.z);girl.moving=false;
+    if(u>=1){girl.slide=null;girl.y=groundAt(girl.x,girl.z,0.5);girl.vy=0;pop();banner('🛝 와아~ 다 내려왔어요!');}}
   const l=girl.trail[girl.trail.length-1];if(!l||Math.hypot(l.x-girl.x,l.z-girl.z)>0.15){girl.trail.push({x:girl.x,z:girl.z});if(girl.trail.length>600)girl.trail.shift();}
   const gm=girlM,t=T*10,w=girl.moving?1:0;gm.legL.rotation.x=Math.sin(t)*0.8*w;gm.legR.rotation.x=-Math.sin(t)*0.8*w;gm.armL.rotation.x=-Math.sin(t)*0.8*w;gm.armR.rotation.x=Math.sin(t)*0.8*w;
   if(air){gm.armL.rotation.x=gm.armR.rotation.x=-2.6;}if(clapT>0){clapT-=dt;gm.armL.rotation.x=gm.armR.rotation.x=-1.5;gm.armL.rotation.z=-0.4+Math.sin(T*40)*0.4;gm.armR.rotation.z=0.4-Math.sin(T*40)*0.4;}else{gm.armL.rotation.z=gm.armR.rotation.z=0;}if(gunT>0&&gm.gun){gm.armR.rotation.x=-1.5;gm.armR.rotation.z=0;}gm.b.position.y=girl.moving&&!air?Math.abs(Math.sin(t))*0.12:0;

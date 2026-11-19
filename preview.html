@@ -371,7 +371,7 @@ const extraPlots=()=>Math.max(0,plotSet.size-16);
 const rwTxt=r=>Object.keys(r).map(k=>RES[k][0]+r[k]).join(' ');
 function plotRewards(){const n=extraPlots();let got=[];PLOT_RW.forEach(([m,r])=>{if(n>=m&&(S.plotRw||0)<m){Object.keys(r).forEach(k=>add(k,r[k]));S.plotRw=m;got.push(m+'칸: '+rwTxt(r));}});
   if(got.length){ching();setTimeout(()=>fact('🎁 땅 넓히기 보상','<p>농장이 '+n+'칸 넓어졌어요!</p><p>'+got.join('<br>')+'</p>'),900);}}
-function plotPrice(){const n=Math.max(0,plotSet.size-16);return{coin:Math.round(40*Math.pow(1.45,n)),twig:3+n,rock:3+n};}
+function plotPrice(){const n=Math.max(0,plotSet.size-16);return{coin:Math.round(40*Math.pow(1.25,n)),twig:3+n,rock:3+n};}
 const gOwnM=studM('#5DB653',[PL*2,PL*2]),gWildM=studM('#3E8E3B',[PL*2,PL*2]);
 const plotR={};let signs=[],forestTrees=[];
 function plotC(x,z){return{x:(x*PL+PL/2)*TILE-HALF,z:(z*PL+PL/2)*TILE-HALF};}
