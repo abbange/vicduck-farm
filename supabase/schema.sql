@@ -8,7 +8,7 @@ create table if not exists duckfarm.families(
 );
 create table if not exists duckfarm.docs(
   code text not null references duckfarm.families(code) on delete cascade,
-  key text not null check (key in ('save/main','homework/current','vocab/current','vocab/stats')),
+  key text not null check (key in ('save/main','save/mom','save/dad','gift/kid','gift/mom','gift/dad','homework/current','vocab/current','vocab/stats')),
   val jsonb not null,
   at timestamptz not null default now(),
   primary key(code,key)
