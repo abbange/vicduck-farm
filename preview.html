@@ -2215,7 +2215,11 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.started)
 
 /* ================= 시작 ================= */
 function restore(){buildCL();plotSet=new Set(S.plots||INIT_PLOTS());refreshPlots();rebuildOcc();S.bld.forEach(spawnB);S.ducks.forEach(addDuckR);const h=byT('home')[0];if(h){const c=bCenter(h);girl.x=c.x;girl.z=c.z+3;}seedTrail();}
-function welcome(){const HAIR=[['pig','양갈래'],['bob','단발'],['long','긴 머리']],HC=['#2B1B14','#4A2E22','#8A5A32','#E0B060'],DR=['#FF7FA8','#4E9FD1','#62AE5E','#9B7BD1','#F0A23A','#E5483B'];
+function welcome(){
+  // 🔍 미리보기에서는 시작 창 없이 바로 농장으로 (테스트용 이름·코인 넉넉히, 안내 창도 건너뜀)
+  if(PREVIEW){closeModal(true);clearWorld();newGame();S.girl='테스트';S.duckName='뽀송이';S.started=true;S.res.coin=1000;['twig','rock','feather','weed','feed','gem'].forEach(k=>S.res[k]=(S.res[k]||0)+30);
+    ['b_field','b_mill','b_nest','b_stall','b_incub','village','newNb','hatch'].forEach(k=>S.seen[k]=1);save();makeGirl();renderActs(true);banner('🔍 미리보기: 바로 시작했어요 (코인·재료 넉넉히)');return;}
+  const HAIR=[['pig','양갈래'],['bob','단발'],['long','긴 머리']],HC=['#2B1B14','#4A2E22','#8A5A32','#E0B060'],DR=['#FF7FA8','#4E9FD1','#62AE5E','#9B7BD1','#F0A23A','#E5483B'];
   modal('<p class="eyebrow">오리 농장</p><h2>오리 농장에 온 걸 환영해요!</h2><p>엄마를 졸졸 따라다니던 아기 오리가 다 컸어요. 이제 오리들과 함께 농장을 꾸려 볼까요?</p>'+
     '<label for="inN"><b>내 이름</b></label><input type="text" id="inN" maxlength="8" placeholder="이름을 적어 줘" autocomplete="off">'+
     '<label for="inD"><b>대장 오리 이름</b></label><input type="text" id="inD" maxlength="8" value="뽀송이" autocomplete="off">'+
