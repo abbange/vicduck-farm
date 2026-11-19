@@ -5,7 +5,11 @@
 ## 파일과 배포
 - 개발 원본: `abbange/duck` 저장소 `farm/index.html` (단일 HTML, Three.js r128 cdnjs). 작업 브랜치 `claude/cool-fermat-g9k93r`.
 - 공개 배포: `abbange/vicduck-farm` 저장소 `main` 브랜치 루트 `index.html` → GitHub Pages https://abbange.github.io/vicduck-farm/ (로그인 불필요, 아이가 실제로 쓰는 주소).
-- 배포 절차: `farm/index.html` 수정 → duck 브랜치에 커밋/푸시 → 같은 파일을 vicduck-farm `index.html`로 복사해 main에 커밋/푸시(1~2분 뒤 반영).
+- 배포 절차(중간 점검 후 배포):
+  1. `farm/index.html` 수정 → 테스트·스크린샷 → duck 브랜치에 커밋/푸시.
+  2. 같은 파일을 vicduck-farm `preview.html`로 복사해 main에 푸시 → 부모님 미리보기 https://abbange.github.io/vicduck-farm/preview.html (부모가 직접 해 보고 확인).
+  3. 부모가 "올려줘"라고 하면 그때 vicduck-farm `index.html`에도 복사해 푸시(아이 주소). 부모가 처음부터 "배포까지 해줘"라고 한 경우에만 바로 index.html까지 올림.
+- 미리보기(`PREVIEW`, 파일명이 preview.html이거나 `?preview`): localStorage 키 `duck-farm-preview`를 따로 쓰고 Supabase 클라우드를 끔 → 아이 저장·가족 클라우드와 섞이지 않음. 화면 아래 🛠 테스트 도구(코인, 밤/낮, 침입자 부르기, 물총 단계).
 - 예전 Claude 아티팩트(https://claude.ai/artifact/M6DzcvxAAjGKREt9rhUFbY, db capability)도 있으나 이제 보조. 옛 버전 루트 `index.html`(2D), `3d/`, `preview/`는 쓰지 않음.
 
 ## 서버 (Supabase)
