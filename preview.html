@@ -118,6 +118,7 @@ button.chip.hw{background:var(--yellow)}
 .mbtns button.primary{background:var(--yellow);border-color:var(--yellow)}
 .mbtns button:disabled{opacity:.45;cursor:default}
 .mbtns button.danger{color:var(--red);border-color:#F5C2BC}
+.runt{position:fixed;top:118px;left:50%;transform:translateX(-50%);z-index:6;display:none;background:rgba(30,35,45,.85);color:#FFE38A;font:700 22px system-ui,sans-serif;padding:6px 16px;border-radius:14px;pointer-events:none}
 .fade{position:fixed;inset:0;background:#0E1730;opacity:0;pointer-events:none;transition:opacity .8s;z-index:15;display:flex;align-items:center;justify-content:center;color:#FFF3C4;font-family:var(--font);font-size:32px}
 .fade.on{opacity:1;pointer-events:auto}
 .mini{position:fixed;right:max(10px,env(safe-area-inset-right,0px));top:calc(max(8px,env(safe-area-inset-top,0px)) + 46px);width:112px;height:112px;border-radius:14px;background:rgba(20,28,34,.55);
@@ -146,6 +147,7 @@ body.inroom .status,body.inroom .quest,body.inroom .mini,body.inroom .joy{displa
   </div>
 </div>
 <div class="foeedge" id="foeEdge"></div><div class="foearrow" id="foeArr"><div class="tip" id="foeTip"></div><span id="foeE"></span></div>
+<div class="runt" id="runT"></div>
 <div class="fade" id="fade">쿨쿨… 좋은 꿈 꿔</div>
 <div id="modal" class="modal" hidden><div class="card" role="dialog" aria-modal="true"><div id="mBody"></div><div id="mBtns" class="mbtns"></div></div></div>
 
@@ -893,7 +895,7 @@ GATES.forEach(g=>{g.c={x:g.x,z:g.z,w:g.w,d:g.d,top:g.top+3,bot:g.top-0.4};OBBY.p
 const gateOpen=g=>!!(S.gates&&S.gates[g.id]===S.day);
 function gateTick(){GATES.forEach(g=>{const o=gateOpen(g);g.c.top=o?-99:g.top+3;g.m.visible=!o;g.tag.visible=!o;if(!o)g.m.material.opacity=0.42+0.15*Math.sin(T*3);});}
 function gateCard(id){const g=GATES.find(x=>x.id===id);if(!g||gateOpen(g))return;const k=Math.floor(S.res.key||0);
-  modal('<p class="eyebrow">🦉 문지기 부엉이</p><h2>'+g.label+' 문</h2><p>"부엉부엉! 🔑 지식 열쇠 1개를 주면 오늘 하루 문을 열어 줄게."</p><p>내 열쇠: <b>🔑 '+k+'개</b></p><p class="src">열쇠가 없으면 부엉이 문제 3개 중 2개를 맞혀서 받을 수 있어요.</p>',
+  modal('<p class="eyebrow">🦉 문지기 부엉이</p><h2>'+g.label+' 문</h2><p>"부엉부엉! 🔑 지식 열쇠 1개를 주면 오늘 하루 문을 열어 줄게."</p><p>내 열쇠: <b>🔑 '+k+'개</b></p><p class="src">열쇠가 없으면 부엉이 문제 3개 중 2개를 맞혀서 받을 수 있어요.</p><p class="note">오늘의 코스: '+themeOf(S.day).n+' · 블록 위 어딘가에 💎 숨은 보석이 있어요. 출발해서 도착까지 ⏱ 시간을 재요!'+(S.best&&S.best[g.id==='g2'?2:g.id==='g3'?3:4]?' · 최고 기록 '+S.best[g.id==='g2'?2:g.id==='g3'?3:4]+'초':'')+'</p>',
     [{t:'🔑 열쇠로 문 열기',cls:'primary',dis:k<1,fn:()=>{S.res.key-=1;bump('key');S.gates=S.gates||{};S.gates[g.id]=S.day;ching();lvl();banner('🔓 '+g.label+' 문이 열렸어요! (오늘 하루)');save();}},
      {t:'🦉 문제 풀고 열쇠 받기',fn:()=>keyQuiz({title:'🦉 문지기 문제',n:3,need:2,done:ok=>{if(ok>=2){add('key',1,{x:girl.x,z:girl.z},girl.y+2.2);cnt('key');save();setTimeout(()=>gateCard(id),200);}else banner('아깝다! 다시 도전해 봐요 💪');}})},{t:'닫기'}]);}
 // ===== 공중 아이템: 코스 블록 위와 점프하는 길목에 잔뜩 (날마다 다시 채워져요) =====
@@ -1007,9 +1009,28 @@ function applyVariant(day){varDay=day;genCourses(day);const r=rng(day*7919+17);c
     const prev=pts[i-1]||c,next=pts[i+1]||c,dx=Math.abs(next.x-prev.x),dz=Math.abs(next.z-prev.z);const roll=r();
     let kind='static',ax='x',amp=0;if(!narrow){if(roll<0.36)kind='static';else if(roll<0.66)kind='drop';else{kind='move';const y=r()<0.25;ax=y?'y':(dx>dz?'z':'x');amp=y?0.4+r()*0.3:0.5+r()*(hard?0.5:0.35);}}
     p.kind=kind;p.ax=ax;p.amp=amp;p.per=2.6+r()*1.6;p.ph=r()*6.28;p.fast=hard&&kind==='drop'?1:0;p.st=0;p.t=0;c.x=p.bx;c.z=p.bz;c.top=p.top;c.bot=p.top-0.5;p.m.visible=true;p.m.position.set(p.bx,p.top-0.25,p.bz);
-    const col=kind==='drop'?'#FF8FB1':kind==='move'?'#7AD3FF':CPAL[Math.floor(r()*CPAL.length)];if(p.m.material&&p.m.material.color)p.m.material.color.set(col);});
+    const TH=themeOf(day),col=kind==='drop'?TH.drop:kind==='move'?TH.move:TH.pal[Math.floor(r()*TH.pal.length)];if(p.m.material&&p.m.material.color)p.m.material.color.set(col);});
   AIRS.forEach((a,i)=>{const k=AIRK[(i+day*3)%AIRK.length];if(a.k!==k){a.k=k;a.sp.material.map=avFxMat(AIRE[k]);a.sp.material.needsUpdate=true;}});}
-function variantTick(){if(varDay!==S.day){const first=varDay<0;applyVariant(S.day);if(!first&&girl.y>4)banner('🎲 오늘의 도전 코스가 새로 바뀌었어요!');}}
+function variantTick(){if(varDay!==S.day){const first=varDay<0;applyVariant(S.day);if(!first&&girl.y>4)banner('🎲 오늘의 도전 코스: '+themeOf(S.day).n);}}
+const THEMES=[{n:'🌈 무지개 코스',pal:CPAL,drop:'#FF8FB1',move:'#7AD3FF'},{n:'🍭 사탕 나라',pal:['#FF8FB1','#FFC2D9','#B8F0D8','#FFE38A','#D9B8F5'],drop:'#FF5A8C',move:'#8FE3C4'},
+  {n:'☁️ 구름 나라',pal:['#FFFFFF','#F2F7FF','#E3EEFC','#FFF8E6'],drop:'#FFD6E5',move:'#CFE6FF'},{n:'🧊 얼음 나라',pal:['#CFF3FF','#A8E6FA','#E8FBFF','#9AD9F0'],drop:'#7FC3EE',move:'#B9F2FF'}];
+const themeOf=d=>THEMES[((d%THEMES.length)+THEMES.length)%THEMES.length];
+// ⏱ 코스 기록과 ⭐, 💎 숨은 보석
+const RUN={k:0,t0:0,on:0};let hgemS=null;
+function courseNodes(k){return CRS[k].map(x=>MOV.find(p=>p.c===x.c)).filter(p=>p&&!p.off);}
+function courseTick(){const el=$('#runT');if(scene_!=='play'||inVil()){RUN.k=0;el.style.display='none';return;}
+  const onBox=(x,z,h,top)=>Math.abs(girl.x-x)<h+0.15&&Math.abs(girl.z-z)<h+0.15&&Math.abs(girl.y-top)<0.06;
+  if(!RUN.k){let on=0;[2,3,4].forEach(k=>{const A=CDEF[k].A;if(onBox(A[0],A[1],A[3],A[2]))on=k;});if(on)RUN.on=on;
+    else if(RUN.on){const k=RUN.on,A=CDEF[k].A,side=k===4?girl.z<A[1]-A[3]:girl.x>A[0]+A[3];if(girl.y>A[2]-0.8&&side){RUN.k=k;RUN.t0=T;RUN.on=0;}else if(girl.y<A[2]-0.8)RUN.on=0;}}
+  else{const k=RUN.k,A=CDEF[k].A,B=CDEF[k].B,t=T-RUN.t0;el.style.display='block';el.textContent='⏱ '+t.toFixed(1)+'초';
+    if(girl.y<A[2]-3||t>300){RUN.k=0;el.style.display='none';}
+    else if(onBox(B[0],B[1],B[3],B[2])){RUN.k=0;el.style.display='none';const par=(courseNodes(k).length+1)*2.2,st=t<=par?3:t<=par*1.6?2:1;S.best=S.best||{};const nb=!S.best[k]||t<S.best[k];if(nb)S.best[k]=+t.toFixed(1);
+      S.stars=S.stars||{};const key=k+'-'+S.day,first3=st===3&&S.stars[key]!==3;if(!S.stars[key]||st>S.stars[key])S.stars[key]=st;if(first3){add('coin',20,{x:B[0],z:B[1]},B[2]+2);}ching();cnt('run');
+      banner('⏱ 코스 '+k+' '+t.toFixed(1)+'초 '+'⭐'.repeat(st)+(nb?' · 최고 기록!':'')+(first3?' · 🪙20':''));save();}}
+  // 숨은 보석
+  if(!hgemS){hgemS=[2,3,4].map(()=>{const sp=textSprite('💎',{w:0.7});scene.add(sp);return sp;});}
+  S.hgem=S.hgem||{};[2,3,4].forEach((k,i)=>{const sp=hgemS[i],key=k+'-'+S.day,ns=courseNodes(k);if(S.hgem[key]||ns.length<2){sp.visible=false;return;}const r=rng(S.day*31+k*7),p=ns[1+Math.floor(r()*(ns.length-1))],c=p.c;if(c.top<-50){sp.visible=false;return;}
+    const y=c.top+1.35+Math.sin(T*3)*0.08;sp.visible=true;sp.position.set(c.x,y,c.z);if(Math.abs(girl.x-c.x)<0.7&&Math.abs(girl.z-c.z)<0.7&&girl.y>y-1.9&&girl.y<y+0.3){S.hgem[key]=1;add('gem',1,{x:c.x,z:c.z},y+0.6);ching();lvl();cnt('hgem');banner('💎 숨은 보석을 찾았어요! (코스 '+k+')');save();}});}
 
 let wasHigh=0;function skyTick(){const open=S.skyDay===S.day;skyLid.rotation.x=lerp(skyLid.rotation.x,open?-1.9:0,0.15);skyFlag.rotation.y=Math.sin(T*3)*0.3;skyTag.visible=!open;
   if(girl.y>5.5&&Math.abs(girl.z-12.5)<3.5&&girl.x>-21&&!S.seen.challenge){S.seen.challenge=1;banner('🔥 도전 코스! 난간이 없어요. 떨어져도 괜찮아요');}
@@ -1191,7 +1212,7 @@ function catchCrit(c){S.crit=S.crit||{};const first=!S.crit[c.id];S.crit[c.id]=(
   else{add('coin',3,{x:girl.x,z:girl.z},2);banner(c.e+' '+c.n+'를 관찰하고 놓아 줬어요');}save();}
 function critBook(){S.crit=S.crit||{};modal('<p class="eyebrow">🐸 물가 친구 도감 · '+Object.keys(S.crit).length+' / '+CRIT.length+'</p><h2>연못과 개울의 친구들</h2><p class="src">연못이나 개울에 나타난 친구에게 가까이 가면 관찰하고 놓아 줘요.</p>'+CRIT.map(c=>S.crit[c.id]?'<h3>'+c.e+' '+c.n+' · '+S.crit[c.id]+'번 만남</h3><p class="fact">'+c.f+'</p>':'<h3>❔ ???</h3><p class="src">'+(c.w==='stream'?'개울':c.w==='pond'?'연못':'연못이나 개울')+'에서 만날 수 있어요.'+(c.rare?' (아주 드물어요)':'')+'</p>').join(''),[{t:'닫기'}]);}
 function decoTick(){byT('swing').forEach((b,i)=>{const r=bldR.get(b.id);if(r&&r.R&&r.R.seat)r.R.seat.rotation.x=Math.sin(T*1.8+i)*0.45;});byT('fountain').forEach((b,i)=>{const r=bldR.get(b.id);if(r&&r.R&&r.R.jet){const k=1+0.25*Math.sin(T*6+i);r.R.jet.scale.set(0.12,0.3*k,0.12);}});}
-function animalTick(dt){decoTick();hensTick(dt);beeTick(dt);dogTick(dt);gooseTick(dt);critTick(dt);}
+function animalTick(dt){decoTick();courseTick();hensTick(dt);beeTick(dt);dogTick(dt);gooseTick(dt);critTick(dt);}
 /* 친해진 이웃이 우리 농장에 놀러 와요 */
 let visM=null;
 function visitTick(){const v=S.visit,h=S.clock/60,show=!!(v&&v.day===S.day&&!v.done&&NPCS[v.id]&&h>=8&&h<18&&!inVil()&&scene_==='play');
