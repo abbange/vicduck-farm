@@ -73,3 +73,34 @@ revoke all on function public.df_create_family(text), public.df_check(text), pub
   public.df_set(text,text,jsonb), public.df_add_result(text,jsonb), public.df_results(text,int) from public;
 grant execute on function public.df_create_family(text), public.df_check(text), public.df_get(text,text),
   public.df_set(text,text,jsonb), public.df_add_result(text,jsonb), public.df_results(text,int) to anon, authenticated;
+
+-- 쉬운 가족 코드(별명): 짧은 코드 → 원래 긴 코드로 연결. 기기에는 긴 코드가 저장된다.
+create table if not exists duckfarm.aliases(
+  alias text primary key check (alias ~ '^[A-Z0-9가-힣]{4,12}$'),
+  code text not null unique references duckfarm.families(code) on delete cascade,
+  at timestamptz not null default now()
+);
+alter table duckfarm.aliases enable row level security;
+revoke all on duckfarm.aliases from anon, authenticated;
+create or replace function public.df_resolve(p_alias text) returns text
+language sql security definer set search_path = '' stable as $$
+  select code from duckfarm.aliases where alias = upper(p_alias);
+$$;
+create or replace function public.df_get_alias(p_code text) returns text
+language sql security definer set search_path = '' stable as $$
+  select alias from duckfarm.aliases where code = p_code;
+$$;
+create or replace function public.df_set_alias(p_code text, p_alias text) returns text
+language plpgsql security definer set search_path = '' as $$
+declare a text := upper(p_alias);
+begin
+  if not exists(select 1 from duckfarm.families where code = p_code) then return 'nocode'; end if;
+  if a !~ '^[A-Z0-9가-힣]{4,12}$' then return 'bad'; end if;
+  if exists(select 1 from duckfarm.families where code = a) then return 'taken'; end if;
+  if exists(select 1 from duckfarm.aliases where alias = a and code <> p_code) then return 'taken'; end if;
+  insert into duckfarm.aliases(alias,code) values (a,p_code)
+    on conflict (code) do update set alias = excluded.alias, at = now();
+  return 'ok';
+end $$;
+revoke all on function public.df_resolve(text), public.df_get_alias(text), public.df_set_alias(text,text) from public;
+grant execute on function public.df_resolve(text), public.df_get_alias(text), public.df_set_alias(text,text) to anon, authenticated;
