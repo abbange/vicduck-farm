@@ -493,9 +493,12 @@ const BREED={pekin:{n:'페킨',body:'#F7F7F2',shade:'#DCDCD3',chest:null,bill:'#
   call:{n:'콜덕',body:'#F4F4F0',shade:'#D6D6D0',chest:null,bill:'#F2A33A',size:0.62,up:0,baby:'#FFE45E'},
   muscovy:{n:'머스코비',body:'#2B2D33',shade:'#F0F0EC',chest:null,bill:'#E9C9B0',size:1.08,up:0,baby:'#E6CF55',face:'#D9363E'},
   mallard:{n:'청둥오리',body:'#A9A79F',shade:'#6E5A47',chest:'#7A4630',headC:'#1E6B47',ring:true,bill:'#D8C447',size:0.95,up:0,baby:'#B9A35A',wild:true},
+  khaki:{n:'카키 캠벨',body:'#B8955E',shade:'#9C7A48',chest:null,headC:'#6B6440',bill:'#4E5A32',size:0.95,up:0,baby:'#C9A85E'},
+  crested:{n:'크레스티드',body:'#F7F7F2',shade:'#DCDCD3',chest:null,bill:'#F59A2C',size:1,up:0,baby:'#FFE45E',crest:1},
+  rouen:{n:'루앙',body:'#8C7A64',shade:'#5E4A36',chest:'#6E3A2A',headC:'#1E6B47',ring:true,bill:'#D8C447',size:1.15,up:0,baby:'#B9A35A'},
   goose:{n:'거위',body:'#FAFAF5',shade:'#E2E0D8',chest:null,bill:'#F28A1E',size:1.3,up:0,baby:'#E9E27A',neck:1.6},
   mallardF:{n:'청둥오리',body:'#A97F55',shade:'#6E5034',chest:null,headC:'#8F6B48',bill:'#C9772E',size:0.9,up:0,baby:'#B9A35A',wild:true}};
-const DEX={goose:'거위는 오리보다 몸집이 크고 목이 길어요. 경계심이 강해서 낯선 것이 다가오면 크게 울어요. 알은 약 30일을 품어야 부화해요.',muscovy:'남아메리카가 고향인 오리로, 얼굴에 빨간 돌기가 있어요. 다른 오리처럼 꽥꽥거리지 않고 쉭쉭 소리를 내요. 알은 약 35일을 품어야 부화해요.',
+const DEX={khaki:'카키 캠벨은 영국에서 만들어진 오리 품종이에요. 알을 아주 많이 낳기로 유명해요.',crested:'크레스티드는 머리 위에 솜뭉치 같은 깃털 뭉치(볏)가 있는 오리예요.',rouen:'루앙은 프랑스 루앙 지방의 이름을 딴 품종이에요. 청둥오리와 깃털 색이 비슷하지만 몸집이 훨씬 커요.',goose:'거위는 오리보다 몸집이 크고 목이 길어요. 경계심이 강해서 낯선 것이 다가오면 크게 울어요. 알은 약 30일을 품어야 부화해요.',muscovy:'남아메리카가 고향인 오리로, 얼굴에 빨간 돌기가 있어요. 다른 오리처럼 꽥꽥거리지 않고 쉭쉭 소리를 내요. 알은 약 35일을 품어야 부화해요.',
   mallard:'청둥오리는 야생 오리예요. 초록 머리가 수컷, 갈색 얼룩무늬가 암컷이에요. 페킨 같은 많은 집오리의 조상이에요. 야생 오리는 잡아서 기르지 않고 멀리서 지켜봐 줘요.',
   pekin:'중국 베이징 쪽에서 청둥오리를 오랫동안 길러 만든 흰 집오리예요. 몸이 무거워 거의 날지 못해요.',
   runner:'펭귄처럼 몸을 꼿꼿이 세우고 걷거나 뛰어요. 날지 못하고, 알을 잘 낳는 품종으로 알려져 있어요.',
@@ -554,7 +557,7 @@ function softDuck(d,parent){const br=BREED[d.b],g=new THREE.Group(),b=new THREE.
     [1,-1].forEach(q=>mesh(SPH2,tilt,[0.17,0.42,0.72],[0.66*q,1.12,-0.06],mS,[0.15,0,0]));}
   mesh(SPH2,head,[0.27,0.1,0.42],[0,-0.1,0.55],bill);
   [1,-1].forEach(q=>{const e=mesh(SPH,head,[0.085,0.1,0.06],[0.27*q,0.12,0.4],k);mesh(SPH,e,[0.35,0.35,0.35],[0.3*q,0.4,0.6],wh);});
-  if(d.hat)head.add(acc(d.hat));if(d.neck)head.add(acc(d.neck));
+  if(br.crest)mesh(SPH2,head,[0.3,0.28,0.32],[0,0.48,-0.08],mB);if(d.hat)head.add(acc(d.hat));if(d.neck)head.add(acc(d.neck));
   if(d.hero&&!d.hat){mesh(SPH2,head,[0.18,0.12,0.06],[0.18,0.5,0],P('#E5483B'),[0,0,0.4]);mesh(SPH2,head,[0.18,0.12,0.06],[-0.18,0.5,0],P('#E5483B'),[0,0,-0.4]);mesh(SPH2,head,[0.07,0.07,0.07],[0,0.5,0],P('#C4281C'));}
   const leg=x=>{const L=new THREE.Group();L.position.set(x,0.52,0.1);b.add(L);mesh(CYL,L,[0.08,0.5,0.08],[0,-0.25,0],o);mesh(SPH2,L,[0.22,0.05,0.3],[0,-0.5,0.14],o);return L;};const legL=leg(0.3),legR=leg(-0.3);
   g.traverse(m=>{if(m.isMesh)m.userData.did=d.id;});(parent||scene).add(g);return{g,b,tilt,legL,legR,mB,mS,br};}
@@ -615,7 +618,7 @@ function tick(dt){const gm=dt*GM_PER_S*FAST;S.clock+=gm;const F=farm();
   S.ducks.forEach(d=>{const was=d.age;d.age+=AGE_PER_GMIN*gm;d.health+=clamp(F.target-d.health,-1,1)*Math.min(Math.abs(F.target-d.health),20/960*gm*3);if(was<49&&d.age>=49){const r=ducks.find(x=>x.d===d);if(r)r.dirty=true;}
     if(was<150&&d.age>=150&&d.sex==='f'&&!S.seen.eggAge){S.seen.eggAge=1;fact('알 낳을 나이가 됐어요','<p>'+josa(duckName(d),'이','가')+' 알을 낳을 만큼 컸어요.</p><p class="fact">실제 오리는 생후 <b>5~6개월</b> 즈음부터 알을 낳기 시작해요. 게임 속 시간은 실제보다 훨씬 빨리 흘러요.</p>');}});
   // 알 낳기: 아침(6~11시), 건강 70 이상 암컷, 하루 한 번까지
-  const h=S.clock/60;if(h>=6&&h<11){S.ducks.forEach(d=>{if(d.sex==='f'&&d.age>=150&&d.health>=70&&d.laidDay!==S.day&&Math.random()<dt*FAST*0.06*season().lay){d.laidDay=S.day;layEgg(d);}});}
+  const h=S.clock/60;if(h>=6&&h<11){S.ducks.forEach(d=>{if(d.sex==='f'&&d.age>=150&&d.health>=70&&d.laidDay!==S.day&&Math.random()<dt*FAST*0.06*season().lay*(d.b==='khaki'?1.4:1)){d.laidDay=S.day;layEgg(d);}});}
   // 방앗간
   byT('mill').forEach(b=>{const r=bldR.get(b.id);if(S.res.grain>=2){b.st.p+=dt*FAST/CAT.mill.rate[b.tier];if(r.R.hub)r.R.hub.rotation.z-=dt*2.5;if(b.st.p>=1){b.st.p=0;S.res.grain-=2;add('feed',3,bCenter(b),2.6);}}});
   // 밭
@@ -629,7 +632,14 @@ function tick(dt){const gm=dt*GM_PER_S*FAST;S.clock+=gm;const F=farm();
   byT('nest').forEach(b=>{if(b.tier===2&&b.st.eggs.length){b.st.eggs.forEach(br=>{S.eggs.push(br);S.res.egg++;cnt('egg');});add('egg',0,bCenter(b),1.4,'+'+b.st.eggs.length+' 🥚');b.st.eggs=[];}nestVis(b);});
   if(S.clock>=24*60){banner('너무 늦었어요. 집으로 가서 자요');goSleep();}}
 let stallT=10;
-function duckName(d){return d.hero?(S.duckName||'대장 오리'):BREED[d.b].n;}
+function duckName(d){return d.hero?(S.duckName||'대장 오리'):(d.nm||BREED[d.b].n);}
+const PERS=[{k:'glutton',n:'먹보',e:'😋',d:'급식기 근처를 좋아해요'},{k:'swim',n:'수영 대장',e:'🏊',d:'물에 자주 들어가요'},{k:'sleepy',n:'잠꾸러기',e:'😴',d:'자주 앉아서 졸아요'},{k:'curious',n:'호기심쟁이',e:'🔍',d:'나를 졸졸 따라와요'},{k:'shy',n:'부끄럼쟁이',e:'😳',d:'조용한 구석을 좋아해요'},{k:'playful',n:'장난꾸러기',e:'🤪',d:'자주 날개를 퍼덕여요'}];
+const perOf=d=>PERS.find(p=>p.k===d.per)||(d.per=PERS[(d.id*7+3)%PERS.length].k,PERS.find(p=>p.k===d.per));
+function loveUp(d,v){const r=ducks.find(x=>x.d===d),l0=d.love||0;d.love=Math.min(10,l0+v);if(r){burst(r.x,(r.h||1)+0.5,r.z,'💗');r.flapT=0.6;}
+  if(l0<5&&d.love>=5){add('feather',5);setTimeout(()=>fact('💗 '+duckName(d)+'와 친해졌어요','<p>애정이 5가 됐어요! 고맙다며 🪶 깃털 5개를 줬어요.</p>'),300);}
+  if(l0<10&&d.love>=10){add('gem',1);setTimeout(()=>fact('💛 단짝 오리!','<p>'+esc(duckName(d))+'와 단짝이 됐어요! ✨ 반짝 돌 1개를 받았어요. 단짝 오리는 나를 자주 따라와요.</p>'),300);}}
+function nameDuck(d){modal('<p class="eyebrow">✏️ 이름 짓기</p><h2>어떤 이름이 좋을까요?</h2><input type="text" id="nmIn" maxlength="8" value="'+esc(d.hero?(S.duckName||''):(d.nm||''))+'" placeholder="예: 뽀송이" autocomplete="off">',
+  [{t:'✔ 이 이름으로',cls:'primary',fn:()=>{const v=($('#nmIn').value||'').trim().slice(0,8);if(d.hero){if(v)S.duckName=v;}else d.nm=v||undefined;const r=ducks.find(x=>x.d===d);if(r&&r.tag){scene.remove(r.tag);r.tag=null;}save();banner(v?'이제 이름은 '+v+'예요!':'이름을 지웠어요');}},{t:'취소'}]);setTimeout(()=>{const i=$('#nmIn');if(i)i.focus();},50);}
 function layEgg(d){S.today.laid++;const nests=byT('nest').filter(b=>b.st.eggs.length<CAT.nest.slots[b.tier]);const r=ducks.find(x=>x.d===d);
   if(nests.length){let best=nests[0],bd=1e9;nests.forEach(b=>{const c=bCenter(b),dd=r?Math.hypot(c.x-r.x,c.z-r.z):0;if(dd<bd){bd=dd;best=b;}});best.st.eggs.push(d.b);if(r){const c=bCenter(best);r.act={x:c.x,z:c.z+0.2,t:4,pose:'sit'};}}
   else if(r){spawnPickup('egg',r.x,r.z,d.b);if(!S.seen.noNest){S.seen.noNest=1;banner('알이 풀밭에 떨어졌어요! 둥지를 지어 주면 둥지에 낳아요');}}
@@ -1229,7 +1239,12 @@ function step(r,tx,tz,sp,dt,arrive){const dx=tx-r.x,dz=tz-r.z,d=Math.hypot(dx,dz
   r.chkT=(r.chkT||0)+dt;if(r.chkD==null)r.chkD=d;if(r.chkT>=0.5){if(d>0.8&&r.chkD-d<sp*0.5*0.3&&!(r.ghost>0)){r.ghost=0.8;r.flapT=0.5;}r.chkT=0;r.chkD=d;}
   if(r.ghost>0){r.ghost-=dt;r.x+=Math.sin(a)*s;r.z+=Math.cos(a)*s;r.yaw+=angDiff(r.yaw,a)*Math.min(1,dt*10);r.moving=true;return false;}
   for(const off of [0,0.6,-0.6,1.2,-1.2,1.9,-1.9]){const nx=r.x+Math.sin(a+off)*s,nz=r.z+Math.cos(a+off)*s;if(!blocked(nx,nz)||blocked(r.x,r.z)){r.x=nx;r.z=nz;r.yaw+=angDiff(r.yaw,a+off)*Math.min(1,dt*8);r.moving=true;return false;}}r.moving=false;return false;}
-function updDucks(dt){const inV=inVil(),night=S.clock>=21*60||S.clock<6*60,houses=byT('duckhouse'),feeders=byT('feeder'),waters=byT('water'),tr=girl.trail;let pi=0;
+function momOf(r,d){let best=null,bd=1e9;ducks.forEach(o=>{if(o===r||o.d.sex!=='f'||o.d.age<150||o.d.b!==d.b||!o.m.g.visible)return;const dd=Math.hypot(o.x-r.x,o.z-r.z);if(dd<bd){bd=dd;best=o;}});return bd<25?best:null;}
+let moodT=3;
+function moodTick(dt){moodT-=dt;ducks.forEach(r=>{const d=r.d,show=(d.nm||d.hero)&&r.m.g.visible&&!inVil()&&Math.hypot(r.x-girl.x,r.z-girl.z)<5;if(show&&!r.tag&&!d.hero){r.tag=textSprite(d.nm,{w:1.4,color:'#FFFFFF'});scene.add(r.tag);}if(r.tag){r.tag.visible=!!show&&!!d.nm;if(show)r.tag.position.set(r.x,(r.h||1)+0.35,r.z);if(!d.nm){scene.remove(r.tag);r.tag=null;}}});
+  if(moodT>0)return;moodT=rnd(3,5);const near=ducks.filter(r=>r.m.g.visible&&!inVil()&&Math.hypot(r.x-girl.x,r.z-girl.z)<9);if(!near.length)return;const r=near[Math.floor(Math.random()*near.length)],d=r.d,F=farm(),night=S.clock>=20*60||S.clock<6*60;
+  const e=night?'💤':inPond(r.x,r.z)?'💦':d.health<50?'😢':!F.fed?'🍽️':(d.love||0)>=8?'💗':[perOf(d).e,'😊','🎵','✨'][Math.floor(Math.random()*4)];burst(r.x,(r.h||1)+0.7,r.z,e);}
+function updDucks(dt){moodTick(dt);const inV=inVil(),night=S.clock>=21*60||S.clock<6*60,houses=byT('duckhouse'),feeders=byT('feeder'),waters=byT('water'),tr=girl.trail;let pi=0;
   ducks.forEach((r,idx)=>{const d=r.d;if(r.dirty){r.dirty=false;}duckLook(r);let goal=null,pose='idle',sp=r.young?1.6:2.0,arrive=0.2;
     if(night&&!parade&&!(d.hero&&inV)){const h=houses[idx%Math.max(1,houses.length)];if(h){const c=bCenter(h);goal={x:c.x,z:c.z+1.4};if(Math.hypot(r.x-goal.x,r.z-goal.z)<0.4){r.inside=true;}}}
     else r.inside=false;
@@ -1238,12 +1253,13 @@ function updDucks(dt){const inV=inVil(),night=S.clock>=21*60||S.clock<6*60,house
     else if(!goal){if(r.act&&r.act.t>0){r.act.t-=dt;goal=r.act;pose=r.act.pose;}
       else if(d.hero&&girl.y>0.7){goal=null;pose='idle';r.moving=false;if(Math.random()<dt*0.3)r.flapT=0.4;}
       else if(d.hero){const p=tr[Math.max(0,tr.length-6)]||girl;goal={x:p.x,z:p.z};sp=4.5;arrive=0.35;}
-      else{r.wt-=dt;if(r.wt<=0){r.wt=rnd(4,9);const roll=Math.random();let tgt=null;
+      else if(d.age<49&&(r.mom=momOf(r,d))){const mo=r.mom,a=(mo.yaw||0)+Math.PI+((idx%3)-1)*0.7;goal={x:mo.x+Math.sin(a)*0.9,z:mo.z+Math.cos(a)*0.9};sp=2.3;arrive=0.3;}
+      else{r.wt-=dt;if(r.wt<=0){r.wt=rnd(4,9);let roll=Math.random(),tgt=null;const pk=perOf(d).k,q=Math.random();if(pk==='glutton'&&q<0.4)roll=0.1;else if(pk==='swim'&&q<0.45)roll=0.5;else if((pk==='curious'||(d.love||0)>=8)&&q<0.45)roll=0.7;else if(pk==='shy'&&q<0.4)roll=0.9;if(pk==='playful'&&q>0.7)r.flapT=0.8;if(pk==='sleepy'&&q<0.35){tgt={x:r.x,z:r.z,pose:'sit'};roll=2;}
           if(roll<0.25&&feeders.length&&S.res.feed>0){const f=feeders[Math.floor(Math.random()*feeders.length)],c=bCenter(f),a=Math.random()*6.28;tgt={x:c.x+Math.cos(a)*0.7,z:c.z+Math.sin(a)*0.7,pose:'peck'};}
           else if(roll<0.42&&waters.length){const f=waters[Math.floor(Math.random()*waters.length)],c=bCenter(f),a=Math.random()*6.28;tgt={x:c.x+Math.cos(a)*0.7,z:c.z+Math.sin(a)*0.7,pose:'drink'};}
           else if(roll<0.62&&sIdx()!==3){const st=byT('stream');if(st.length&&Math.random()<0.5){const b=st[Math.floor(Math.random()*st.length)],c=bCenter(b);tgt={x:c.x+(Math.random()-0.5)*0.5,z:c.z+(Math.random()-0.5)*0.5,pose:'idle'};}else{const a=Math.random()*6.28,dd=Math.random()*(POND.r-0.6);tgt={x:POND.x+Math.cos(a)*dd,z:POND.z+Math.sin(a)*dd,pose:'idle'};}}
           else if(roll<0.75){tgt={x:girl.x+rnd(-2,2),z:girl.z+rnd(-2,2),pose:'idle'};}
-          else{const p=freeSpot()||{x:0,z:0};tgt={x:p.x,z:p.z,pose:'idle'};}r.tx=tgt.x;r.tz=tgt.z;r.tp=tgt.pose;}
+          else if(!tgt){const p=freeSpot()||{x:0,z:0};tgt={x:p.x,z:p.z,pose:'idle'};}r.tx=tgt.x;r.tz=tgt.z;r.tp=tgt.pose;}
         goal={x:r.tx,z:r.tz};pose=r.tp||'idle';sp=r.young?1.3:1.6;}}
     if(goal)step(r,goal.x,goal.z,sp,dt,arrive);
     const sw=inPond(r.x,r.z),m=r.m,t=T*11+idx,w=r.moving?1:0;m.legL.rotation.x=Math.sin(t)*0.7*w;m.legR.rotation.x=-Math.sin(t)*0.7*w;m.b.rotation.z=Math.sin(t)*0.08*w;m.legL.visible=m.legR.visible=!sw&&pose!=='sit';
@@ -1396,13 +1412,14 @@ function incubate(b,want){if(S.res.egg<1)return;const males=fertileSet();let i=-
   if(i<0){if(!S.seen.infertile){S.seen.infertile=1;}fact('알이 깨어나지 않아요','<p class="fact">수컷 오리가 함께 지내야 품었을 때 새끼가 되는 알(유정란)이 생겨요. 지금 창고 알과 같은 품종의 다 큰 수컷이 농장에 없어요.</p>');return;}
   const br=S.eggs.splice(i,1)[0];S.res.egg--;b.st.eggs.push({b:br,t:0});cnt('incub');pop();banner(BREED[br].n+' 알을 넣었어요. 따뜻하게 품는 중…');}
 /* ================= 카드: 오리 ================= */
-function duckCard(id){if(id<0){S.dex.mallard=1;modal('<p class="eyebrow">연못 손님</p><h2>💚 청둥오리</h2><p class="fact">'+DEX.mallard+'</p>');return;}const d=S.ducks.find(x=>x.id===id);if(!d)return;const br=BREED[d.b],mo=Math.floor(d.age/30),dy=Math.floor(d.age%30);const hearts='❤️'.repeat(Math.max(1,Math.round(d.health/20)));
-  modal('<p class="eyebrow">'+(d.hero?'대장 오리 · ':'')+br.n+'</p><h2>'+esc(duckName(d))+'</h2><div class="stat"><span>성별</span><b>'+(d.sex==='f'?'암컷 ♀':'수컷 ♂')+'</b><span>나이</span><b>생후 '+(mo?mo+'개월 ':'')+dy+'일</b><span>건강</span><b>'+hearts+' '+Math.round(d.health)+'</b></div>'+
+function duckCard(id){if(id<0){S.dex.mallard=1;modal('<p class="eyebrow">연못 손님</p><h2>💚 청둥오리</h2><p class="fact">'+DEX.mallard+'</p>');return;}const d=S.ducks.find(x=>x.id===id);if(!d)return;const br=BREED[d.b],mo=Math.floor(d.age/30),dy=Math.floor(d.age%30);const hearts='❤️'.repeat(Math.max(1,Math.round(d.health/20))),pe=perOf(d),lv=d.love||0;
+  modal('<p class="eyebrow">'+(d.hero?'대장 오리 · ':'')+br.n+'</p><h2>'+esc(duckName(d))+'</h2><div class="stat"><span>성별</span><b>'+(d.sex==='f'?'암컷 ♀':'수컷 ♂')+'</b><span>나이</span><b>생후 '+(mo?mo+'개월 ':'')+dy+'일</b><span>건강</span><b>'+hearts+' '+Math.round(d.health)+'</b><span>성격</span><b>'+pe.e+' '+pe.n+' · '+pe.d+'</b><span>애정</span><b>'+(lv?'💗'.repeat(Math.ceil(lv/2)):'🤍')+' '+lv+' / 10'+(lv>=10?' 단짝!':'')+'</b></div>'+
     (d.age<49?'<p class="src">아직 아기 오리예요. 깃털이 다 나면 어른이 돼요.</p>':d.sex==='f'&&d.age<150?'<p class="src">생후 5개월이 되면 알을 낳기 시작해요.</p>':''),
-    [{t:'🤗 쓰다듬기',cls:'primary',fn:()=>{const r=ducks.find(x=>x.d===d);if(r){burst(r.x,r.h+0.4,r.z,'❤️');quack(d.b,d.age<49);}d.health=Math.min(100,d.health+2);cnt('pet');}},{t:'👒 옷 입히기',fn:()=>dressCard(d)},{t:'📒 도감',fn:dexCard},{t:'닫기'}]);}
+    [{t:'🤗 쓰다듬기',cls:'primary',fn:()=>{const r=ducks.find(x=>x.d===d);if(r){burst(r.x,r.h+0.4,r.z,'❤️');quack(d.b,d.age<49);}d.health=Math.min(100,d.health+2);cnt('pet');if(d.petDay!==S.day){d.petDay=S.day;loveUp(d,1);}save();}},
+     {t:'🍞 간식 주기 (🥣1)',dis:d.snackDay===S.day||S.res.feed<1,fn:()=>{S.res.feed-=1;bump('feed');d.snackDay=S.day;d.health=Math.min(100,d.health+5);const r=ducks.find(x=>x.d===d);if(r){r.act={x:r.x,z:r.z,t:2,pose:'peck'};quack(d.b,d.age<49);}loveUp(d,2);cnt('snack');save();}},{t:'✏️ 이름 짓기',fn:()=>nameDuck(d)},{t:'👒 옷 입히기',fn:()=>dressCard(d)},{t:'📒 도감',fn:dexCard},{t:'닫기'}]);}
 /* ================= 도감 / 상점 ================= */
-function dexCard(){const E={pekin:'🤍',runner:'🏃',call:'🐣',muscovy:'❤️',mallard:'💚',goose:'🪿'},H={goose:'상점 트럭에서 데려올 수 있어요.',runner:'큰 오리집(2단계)을 지으면 만날 수 있어요.',call:'오리 12마리와 함께 줄서기를 하면 만날 수 있어요.',muscovy:'땅을 4칸 넓히면 만날 수 있어요.',mallard:'농장을 예쁘게 꾸미면(장식 점수 10) 연못에 찾아와요.'};
-  const ks=['pekin','runner','call','muscovy','goose','mallard'];const h=ks.map(k=>{const own=S.ducks.filter(d=>d.b===k).length,seen=S.dex[k];return '<h3>'+(seen?E[k]+' '+BREED[k].n+(k==='mallard'?' · 연못 손님':' · '+own+'마리'):'❔ ???')+'</h3>'+(seen?'<p class="fact">'+DEX[k]+'</p>':'<p class="src">'+H[k]+'</p>');}).join('');
+function dexCard(){const E={pekin:'🤍',runner:'🏃',call:'🐣',muscovy:'❤️',mallard:'💚',goose:'🪿',khaki:'🤎',crested:'🎀',rouen:'💜'},H={khaki:'상점 트럭에서 데려올 수 있어요.',crested:'상점 트럭에서 데려올 수 있어요.',rouen:'상점 트럭에서 데려올 수 있어요.',goose:'상점 트럭에서 데려올 수 있어요.',runner:'큰 오리집(2단계)을 지으면 만날 수 있어요.',call:'오리 12마리와 함께 줄서기를 하면 만날 수 있어요.',muscovy:'땅을 4칸 넓히면 만날 수 있어요.',mallard:'농장을 예쁘게 꾸미면(장식 점수 10) 연못에 찾아와요.'};
+  const ks=['pekin','runner','call','muscovy','khaki','crested','rouen','goose','mallard'];const h=ks.map(k=>{const own=S.ducks.filter(d=>d.b===k).length,seen=S.dex[k];return '<h3>'+(seen?E[k]+' '+BREED[k].n+(k==='mallard'?' · 연못 손님':' · '+own+'마리'):'❔ ???')+'</h3>'+(seen?'<p class="fact">'+DEX[k]+'</p>':'<p class="src">'+H[k]+'</p>');}).join('');
   modal('<p class="eyebrow">오리 도감 · '+ks.filter(k=>S.dex[k]).length+' / '+ks.length+'</p><h2>우리 농장 오리들</h2>'+h,[{t:'🐸 물가 친구 도감',fn:critBook},{t:'닫기'}]);}
 function twoTap(el,go){if(el.dataset.armed){go();return;}document.querySelectorAll('.item.armed').forEach(x=>{delete x.dataset.armed;x.classList.remove('armed');const c=x.querySelector('.cf');if(c)c.remove();});el.dataset.armed=1;el.classList.add('armed');const c=document.createElement('span');c.className='cf';c.textContent='👆 한 번 더 누르면 사요';el.appendChild(c);pop();}
 function shopCard(){const F=farm(),room=F.hc-F.n;const items=[
@@ -1411,6 +1428,9 @@ function shopCard(){const F=farm(),room=F.hc-F.n;const items=[
   {k:'runner',n:'🏃 인디언 러너 한 쌍',c:{coin:150},need:2,lock:!S.unlock.runner,fn:()=>{newDuck('runner','f',150);newDuck('runner','m',150);}},
   {k:'call',n:'🐣 콜덕 한 쌍',c:{coin:200},need:2,lock:!S.unlock.call,fn:()=>{newDuck('call','f',150);newDuck('call','m',150);}},
   {k:'musc',n:'❤️ 머스코비 한 쌍',c:{coin:250},need:2,lock:!S.unlock.muscovy,fn:()=>{newDuck('muscovy','f',150);newDuck('muscovy','m',150);}},
+  {k:'khaki',n:'🤎 카키 캠벨 한 쌍 (알을 많이 낳아요)',c:{coin:160},need:2,fn:()=>{newDuck('khaki','f',150);newDuck('khaki','m',150);}},
+  {k:'crested',n:'🎀 크레스티드 한 쌍 (머리 볏)',c:{coin:230},need:2,fn:()=>{newDuck('crested','f',150);newDuck('crested','m',150);}},
+  {k:'rouen',n:'💜 루앙 한 쌍 (큰 오리)',c:{coin:200},need:2,fn:()=>{newDuck('rouen','f',150);newDuck('rouen','m',150);}},
   {k:'goose',n:'🪿 거위 한 쌍 (농장 지킴이)',c:{coin:220},need:2,fn:()=>{newDuck('goose','f',150);newDuck('goose','m',150);setTimeout(()=>fact('🪿 거위가 왔어요','<p>침입자가 오면 거위들이 꽥꽥 울며 달려가서 함께 쫓아내 줘요.</p><p class="fact">'+DEX.goose+'</p>'),400);}},
   ...(S.dog?[]:[{k:'dog',n:'🐕 강아지 (농장 지킴이)',c:{coin:150},fn:()=>{S.dog={n:'바둑이'};dogMake();setTimeout(()=>fact('🐕 바둑이가 왔어요','<p>바둑이는 나를 졸졸 따라다니다가, 늑대·너구리 같은 침입자가 오면 멍멍 짖으며 쫓아내요. 가까이 가서 🐕 쓰다듬기를 눌러 봐요!</p><p class="fact">실제 농장에서도 양이나 닭 같은 가축을 지키는 개(가축 보호견)를 키워요.</p>'),400);}}]),
   {k:'buyf',n:'🪶 깃털 5개',c:{coin:12},fn:()=>add('feather',5)},{k:'buyt',n:'🪵 나뭇가지 10개',c:{coin:10},fn:()=>add('twig',10)},{k:'buyr',n:'🪨 조약돌 10개',c:{coin:10},fn:()=>add('rock',10)},{k:'gemr',n:'🪨 조약돌 15개 → ✨ 반짝 돌 1개',c:{rock:15},fn:()=>add('gem',1)},{k:'gemt',n:'🪵 나뭇가지 15개 → ✨ 반짝 돌 1개',c:{twig:15},fn:()=>add('gem',1)},{k:'gemw',n:'🍀 개구리밥 10개 → ✨ 반짝 돌 1개',c:{weed:10},fn:()=>add('gem',1)},{k:'sellg',n:'🌾 밀 5개 팔기 → 🪙4',c:{grain:5},fn:()=>add('coin',4)},{k:'sells',n:'🟨 짚 5개 팔기 → 🪙3',c:{straw:5},fn:()=>add('coin',3)},{k:'sellh',n:'🍯 꿀 1병 팔기 → 🪙10',c:{honey:1},fn:()=>add('coin',10)}];
