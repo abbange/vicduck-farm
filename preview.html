@@ -237,6 +237,15 @@ const SFX={
   boing:()=>tone('sine',300,700,0.18,0.07),
   pop2:()=>{tone('triangle',700,1300,0.06,0.08);}};
 // 🗣️ 영어 대사: 말로 들려주고 화면에 영어 문장과 뜻을 함께 보여 줘요 (☰ 메뉴에서 끄고 켜요)
+// 🎀 귀엽고 또렷한 영어 목소리 고르기: 여자 목소리 우선, 장난감 목소리(할아버지·로봇 등)는 빼요
+const VBAD=/grandpa|grandma|fred|albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|junior|organ|pipe|ralph|trinoids|whisper|zarvox|jester|superstar|wobble|rocko|eddy|reed|shelley|sandy|flo\b|daniel|alex\b|aaron|arthur|gordon|oliver|tom\b|david|mark|guy|ryan|eric|christopher|male/i;
+const VPREF=['Samantha','Ava','Allison','Susan','Nicky','Karen','Tessa','Moira','Serena','Kate','Martha','Catherine','Google US English','Microsoft Aria','Microsoft Jenny','Microsoft Ana','Microsoft Zira','Microsoft Michelle'];
+let _vs=[];function enVoices(){try{const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]/i.test(v.lang)&&!VBAD.test(v.name));const sc=v=>{const i=VPREF.findIndex(n=>v.name.includes(n));return(i<0?50:i)+(/en[-_]US/i.test(v.lang)?0:5)+(v.localService?0:2);};_vs=vs.sort((a,b)=>sc(a)-sc(b));}catch(e){_vs=[];}return _vs;}
+try{speechSynthesis.onvoiceschanged=()=>{_vs=[];};}catch(e){}
+function enVoice(){const vs=_vs.length?_vs:enVoices();if(!vs.length)return null;let nm='';try{nm=localStorage.getItem(KEY+'-voice')||'';}catch(e){}return vs.find(v=>v.name===nm)||vs[0];}
+function voiceCard(){const vs=enVoices().slice(0,8),cur=enVoice();if(!vs.length){modal('<h2>영어 목소리를 찾지 못했어요</h2><p class="src">기기 설정 → 손쉬운 사용 → 읽기 및 말하기 → 음성에서 영어(미국) 목소리를 내려받으면 쓸 수 있어요.</p>');return;}
+  modal('<p class="eyebrow">🗣️ 영어 목소리</p><h2>마음에 드는 목소리를 골라요</h2><p class="src">누르면 들어 볼 수 있어요.</p><div class="opts">'+vs.map((v,i)=>'<button type="button" data-v="'+i+'" aria-pressed="'+(cur&&v.name===cur.name)+'">'+esc(v.name.replace(/\(.*\)/,'').trim())+'</button>').join('')+'</div>',[{t:'다 골랐어요'}]);
+  document.querySelectorAll('.opts [data-v]').forEach(b=>b.onclick=()=>{const v=vs[+b.dataset.v];try{localStorage.setItem(KEY+'-voice',v.name);}catch(e){}document.querySelectorAll('.opts [data-v]').forEach(x=>x.setAttribute('aria-pressed',x===b));say('Hi! I\'m your farm friend. Follow me, ducks!');});}
 let lineT=0;function enOn(){try{return localStorage.getItem(KEY+'-en')!=='0';}catch(e){return true;}}
 function line(en,ko,force){if(!enOn())return;const now=performance.now();if(!force&&now-lineT<3500)return;lineT=now;say(en);banner('🗣️ "'+en+'" · '+ko);}
 function jingle(){[659,784,880,784,659,587,659].forEach((f,i)=>tone('triangle',f,f,0.14,0.08,i*0.16));}
@@ -780,11 +789,13 @@ function foeArrowTick(){const el=$('#foeArr');let best=null,bd=1e9;if(scene_==='
   const W=innerWidth,H=innerHeight,px=(x+1)/2*W,py=(1-y)/2*H;el.style.display='flex';el.style.transform='translate('+px+'px,'+py+'px) scale('+(1+0.08*Math.sin(T*8))+')';
   $('#foeTip').style.transform='rotate('+Math.atan2(x,y)+'rad) translateY(-38px)';const fe=$('#foeE');if(fe.textContent!==FOE_E[best.type])fe.textContent=FOE_E[best.type];}
 function foeNear(){return foes.some(f=>f.state!=='flee'&&Math.hypot(f.x-girl.x,f.z-girl.z)<4.5);}
-function shoo(){if(!foes.some(f=>f.state!=='flee'))return;clapT=0.5;tone('square',900,500,0.06,0.08);tone('square',900,500,0.06,0.08,0.12);burst(girl.x,2.3,girl.z,'👏');
+const SHOO_EN=[['Go away!','저리 가!'],['Shoo! Shoo!','훠이! 훠이!'],['Get out of my farm!','우리 농장에서 나가!'],['Leave my ducks alone!','우리 오리들 건드리지 마!'],['Go back to the forest!','숲으로 돌아가!'],['Stay away from my farm!','우리 농장에 오지 마!']];let shooI=0;
+function shooLine(){const l=SHOO_EN[shooI++%SHOO_EN.length];line(l[0],l[1]);}
+function shoo(){if(!foes.some(f=>f.state!=='flee'))return;shooLine();clapT=0.5;tone('square',900,500,0.06,0.08);tone('square',900,500,0.06,0.08,0.12);burst(girl.x,2.3,girl.z,'👏');
   const helpers=ducks.filter(r=>r.m.g.visible&&!r.young&&Math.hypot(r.x-girl.x,r.z-girl.z)<6),pow=helpers.length>=3?2:1;helpers.slice(0,5).forEach(r=>{burst(r.x,r.h+0.4,r.z,'꽥!');r.flapT=0.9;});if(helpers.length)quack(helpers[0].d.b);
   let hit=false;foes.forEach(f=>{if(f.state==='flee')return;if(Math.hypot(f.x-girl.x,f.z-girl.z)<4.5){f.hp-=pow;hit=true;burst(f.x,(f.y||0)+1.3,f.z,f.hp>0?'💢':'💨');if(f.hp<=0)scare(f);}});
   if(!hit)banner('더 가까이 가서 쫓아요!');else if(pow>1&&!S.seen.duckHelp){S.seen.duckHelp=1;banner('오리들이 함께 꽥꽥! 두 배로 쫓아내요');}}
-function scare(f){f.state='flee';f.t=0;f.m.R.ex.visible=false;add('coin',f.type==='wolf'?15:8,{x:f.x,z:f.z},2);if(f.type==='crow'){spawnPickup('feather',f.x,f.z);spawnPickup('feather',f.x+0.5,f.z+0.3);}cnt('shoo');S.shoo=(S.shoo||0)+1;S.today.shoo=(S.today.shoo||0)+1;
+function scare(f){if(foes.some(x=>x!==f&&x.state!=='flee'))setTimeout(()=>line(['Bye-bye! Don\'t come back!','Run away! Ha ha!','And stay out!'][Math.floor(Math.random()*3)],'잘 가! 다시 오지 마!',true),200);f.state='flee';f.t=0;f.m.R.ex.visible=false;add('coin',f.type==='wolf'?15:8,{x:f.x,z:f.z},2);if(f.type==='crow'){spawnPickup('feather',f.x,f.z);spawnPickup('feather',f.x+0.5,f.z+0.3);}cnt('shoo');S.shoo=(S.shoo||0)+1;S.today.shoo=(S.today.shoo||0)+1;
   if([5,15,30].includes(S.shoo)){add('gem',1);setTimeout(()=>fact('🏅 농장 지킴이 배지','<p>침입자를 '+S.shoo+'번 쫓아냈어요! 반짝 돌 1개를 받았어요.</p>'),300);}
   if(!foes.some(x=>x.state!=='flee')){ching();banner('모두 쫓아냈어요! 🎉');setTimeout(()=>{SFX.fanfare();line('Great job! The farm is safe!','잘했어! 농장이 안전해졌어!',true);},300);}renderActs(true);}
 function updFoes(dt){for(let i=foes.length-1;i>=0;i--){const f=foes[i],m=f.m;f.t+=dt*FAST;let tx=f.x,tz=f.z,sp=0;
@@ -830,7 +841,7 @@ function fireGun(){if(!S.gun||inVil()||scene_!=='play'||modalOpen)return;const G
     const c=S.gun===4?RAINBOW[Math.floor(Math.random()*6)]:G.col,m=new THREE.Mesh(DROPG,dropMat(c));m.position.set(ox,oy,oz);scene.add(m);
     drops.push({m,x:ox,y:oy,z:oz,vx:Math.sin(a)*s,vy,vz:Math.cos(a)*s,d:0,rng:G.rng+2,dmg:G.dmg,tg:f});}
   tone('sine',600,1300,0.07,0.05);tone('triangle',380,220,0.12,0.03,0.03);}
-function wetFoe(f,dmg,vx,vz){f.hp-=dmg;const v=Math.hypot(vx,vz)||1;burst(f.x,(f.y||0)+1.3,f.z,f.hp>0?'💦':'💨');cnt('splash');
+function wetFoe(f,dmg,vx,vz){f.hp-=dmg;shooLine();const v=Math.hypot(vx,vz)||1;burst(f.x,(f.y||0)+1.3,f.z,f.hp>0?'💦':'💨');cnt('splash');
   if(f.type!=='crow'||f.state!=='come'){const nx=f.x+vx/v*0.35,nz=f.z+vz/v*0.35;if(!outB(nx,nz)){f.x=nx;f.z=nz;}}tone('sine',900,300,0.08,0.04);if(f.hp<=0)scare(f);}
 function updDrops(dt){for(let i=drops.length-1;i>=0;i--){const p=drops[i];
   // 움직이는 침입자(날아오는 까마귀 등)도 맞도록 물줄기가 목표 쪽으로 살짝 휘어요
@@ -1643,7 +1654,7 @@ function questTick(){unlockTick();const q=Q[S.q];if(!q){$('#quest').innerHTML='<
 const isHanja=t=>/[\u3400-\u9fff]/.test(String(t||''));
 // 한자(한문) 단어는 소리 내어 읽지 않아요(부모님 요청)
 const hzHide=t=>{const b=$('#qSay');if(b&&isHanja(t))b.style.display='none';};
-function say(t){try{if(!window.speechSynthesis)return;let ko=false;if(isHanja(t))return;const u=new SpeechSynthesisUtterance(t);u.lang=ko?'ko-KR':'en-US';u.rate=0.85;bgmDuck=0.25;u.onend=u.onerror=()=>{bgmDuck=1;};setTimeout(()=>{bgmDuck=1;},6000);speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
+function say(t){try{if(!window.speechSynthesis)return;let ko=false;if(isHanja(t))return;const u=new SpeechSynthesisUtterance(t);u.lang=ko?'ko-KR':'en-US';u.rate=0.9;if(!ko){u.pitch=1.25;try{const v=enVoice();if(v){u.voice=v;u.lang=v.lang;}}catch(e){}}bgmDuck=0.25;u.onend=u.onerror=()=>{bgmDuck=1;};setTimeout(()=>{bgmDuck=1;},6000);speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
 function norm(t){return String(t).toLowerCase().replace(/[^a-z0-9' ]+/g,' ').replace(/\s+/g,' ').trim();}
 function parseHW(text){const out=[];let g=0,title='';text.split(/\n+/).forEach(l=>{l=l.trim();if(!l)return;if(l.startsWith('#')){g++;title=l.replace(/^#+\s*/,'');return;}
   let type='word';const pm=l.match(/^(고르기|빈칸|쓰기|단어)\s*[:：]\s*/);if(pm){type={'고르기':'choose','빈칸':'blank','쓰기':'write','단어':'word'}[pm[1]];l=l.slice(pm[0].length);}
@@ -2179,7 +2190,7 @@ $('#status').addEventListener('click',e=>{const g=e.target.closest('[data-g]');i
 $('#bBag').onclick=()=>{ac();bagCard();};$('#bAv').onclick=()=>{ac();closetCard();};$('#bVoc').onclick=()=>{ac();vocabView();};$('#bHw').onclick=()=>{ac();if(scene_==='room'&&roomKind==='home'){hwStart();return;}modal('<p class="eyebrow">📚 숙제</p><h2>숙제는 공부방 책상에서 해요</h2><p>'+(S.hw&&!S.hw.done?'오늘 숙제가 있어요! 다 풀면 🪙 '+S.hw.reward:'우리 집에 들어가면 공부방이 있어요.')+'</p>',[{t:'🏠 공부방으로 가기',cls:'primary',fn:enterRoom},{t:'닫기'}]);};
 $('#bShop').onclick=()=>{ac();shopCard();};$('#bDex').onclick=()=>{ac();dexCard();};
 $('#bMenu').onclick=()=>{ac();modal('<p class="eyebrow">메뉴</p><h2>설정</h2><p class="src" style="float:right;margin-top:-34px">버전 1119a</p><p class="src">움직이기: 조이스틱·WASD·땅 누르기 · 점프: 버튼·스페이스 · 둘러보기: 화면 끌기 · 확대: 두 손가락·휠</p>',
-  [{t:'💾 지금 저장하기',cls:'primary',fn:()=>saveNow(true)},{t:'👩 부모님 메뉴 (비밀번호)',fn:()=>pinGate(parentMenu)},...(S.inkOK?[{t:S.ink?'🖌 그림책 모드 끄기':'🖌 그림책 모드 켜기',fn:()=>{S.ink=!S.ink;save();banner(S.ink?'그림책 모드!':'원래 화면으로');}}]:[]),{t:SOFT?'🧱 블록(로블록스) 그래픽으로':'🧸 부드러운 3D 그래픽으로',fn:()=>{saveNow(false);try{localStorage.setItem(KEY+'-style',SOFT?'block':'soft');}catch(e){}setTimeout(()=>(leaving=true,location.reload()),400);}},{t:enOn()?'🗣️ 영어 음성 끄기':'🗣️ 영어 음성 켜기',fn:()=>{try{localStorage.setItem(KEY+'-en',enOn()?'0':'1');}catch(e){}banner(enOn()?'영어 음성 켜짐':'영어 음성 꺼짐');}},{t:bgmOn?'🎵 배경음악 끄기':'🎵 배경음악 켜기',fn:()=>{bgmOn=!bgmOn;try{localStorage.setItem(KEY+'-bgm',bgmOn?'1':'0');}catch(e){}banner(bgmOn?'배경음악 켜짐':'배경음악 꺼짐');}},{t:muted?'🔈 소리 켜기':'🔇 소리 끄기',fn:()=>{muted=!muted;try{localStorage.setItem(KEY+'-mute',muted?'1':'0');}catch(e){}}},{t:'닫기'}]);};
+  [{t:'💾 지금 저장하기',cls:'primary',fn:()=>saveNow(true)},{t:'👩 부모님 메뉴 (비밀번호)',fn:()=>pinGate(parentMenu)},...(S.inkOK?[{t:S.ink?'🖌 그림책 모드 끄기':'🖌 그림책 모드 켜기',fn:()=>{S.ink=!S.ink;save();banner(S.ink?'그림책 모드!':'원래 화면으로');}}]:[]),{t:SOFT?'🧱 블록(로블록스) 그래픽으로':'🧸 부드러운 3D 그래픽으로',fn:()=>{saveNow(false);try{localStorage.setItem(KEY+'-style',SOFT?'block':'soft');}catch(e){}setTimeout(()=>(leaving=true,location.reload()),400);}},{t:'🎀 영어 목소리 고르기',fn:voiceCard},{t:enOn()?'🗣️ 영어 음성 끄기':'🗣️ 영어 음성 켜기',fn:()=>{try{localStorage.setItem(KEY+'-en',enOn()?'0':'1');}catch(e){}banner(enOn()?'영어 음성 켜짐':'영어 음성 꺼짐');}},{t:bgmOn?'🎵 배경음악 끄기':'🎵 배경음악 켜기',fn:()=>{bgmOn=!bgmOn;try{localStorage.setItem(KEY+'-bgm',bgmOn?'1':'0');}catch(e){}banner(bgmOn?'배경음악 켜짐':'배경음악 꺼짐');}},{t:muted?'🔈 소리 켜기':'🔇 소리 끄기',fn:()=>{muted=!muted;try{localStorage.setItem(KEY+'-mute',muted?'1':'0');}catch(e){}}},{t:'닫기'}]);};
 
 /* ================= 하늘 / 시간 ================= */
 function applyTime(){const h=(S.clock/60)%24;const day=clamp(Math.min((h-5.5)/1.5,(21.5-h)/1.5),0,1);const dusk=clamp(1-Math.abs(h-19)/1.6,0,1)*0.8+clamp(1-Math.abs(h-6.3)/1,0,1)*0.6;
