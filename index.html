@@ -602,7 +602,7 @@ function tick(dt){const gm=dt*GM_PER_S*FAST;S.clock+=gm;const F=farm();
   byT('incub').forEach(b=>{const r=bldR.get(b.id);r.R.light.material.emissiveIntensity=b.st.eggs.length?0.8+0.4*Math.sin(T*4):0.1;b.st.eggs.forEach(e=>{e.t+=dt*FAST;});
     const done=b.st.eggs.find(e=>e.t>=CAT.incub.time[b.tier]*(e.b==='muscovy'?1.25:1));if(done){if(S.ducks.length<capOf('duckhouse')){b.st.eggs.splice(b.st.eggs.indexOf(done),1);hatch(done.b,bCenter(b));}else if(!b.st.full){b.st.full=1;banner('오리집이 꽉 차서 부화를 기다려요');}}else b.st.full=0;eggVis(b);});
   // 알 가게
-  stallT-=dt*FAST;if(stallT<=0){stallT=25;const st=byT('stall');if(st.length&&S.autoSell){let reserve=byT('incub').reduce((s,b)=>s+CAT.incub.slots[b.tier]-b.st.eggs.length,0);st.forEach(b=>{const n=Math.min(CAT.stall.batch[b.tier],Math.max(0,S.res.egg-reserve));if(n>0){for(let i=0;i<n;i++)S.eggs.pop();S.res.egg-=n;const c=n*CAT.stall.price[b.tier];add('coin',c,bCenter(b),2.6);S.today.sold+=n;S.today.coins+=c;cnt('sold',n);ching();}});}}
+  stallT-=dt*FAST;if(stallT<=0){stallT=25;const st=byT('stall');if(st.length&&S.autoSell){let reserve=byT('incub').reduce((s,b)=>s+CAT.incub.slots[b.tier]-b.st.eggs.length,0);st.forEach(b=>{const n=Math.min(CAT.stall.batch[b.tier],Math.max(0,S.res.egg-reserve));if(n>0){for(let i=0;i<n;i++){let w=0;S.eggs.forEach((e,k)=>{if(eggPri(e)>=eggPri(S.eggs[w]))w=k;});S.eggs.splice(w,1);}S.res.egg-=n;const c=n*CAT.stall.price[b.tier];add('coin',c,bCenter(b),2.6);S.today.sold+=n;S.today.coins+=c;cnt('sold',n);ching();}});}}
   // 포근 둥지 자동 수집
   byT('nest').forEach(b=>{if(b.tier===2&&b.st.eggs.length){b.st.eggs.forEach(br=>{S.eggs.push(br);S.res.egg++;cnt('egg');});add('egg',0,bCenter(b),1.4,'+'+b.st.eggs.length+' 🥚');b.st.eggs=[];}nestVis(b);});
   if(S.clock>=24*60){banner('너무 늦었어요. 집으로 가서 자요');goSleep();}}
@@ -1148,7 +1148,11 @@ function bldCard(id){const b=S.bld.find(q=>q.id===id);if(!b)return;const c=CAT[b
   else if(b.t==='mill'){body='<div class="stat"><span>창고 밀</span><b>'+Math.floor(S.res.grain)+'개</b><span>속도</span><b>'+c.rate[tier]+'초마다 밀 2 → 사료 3</b></div>'+(S.res.grain<2?'<p class="note">밀이 모자라 멈췄어요. 밀밭에서 밀을 거둬 와요.</p>':'');}
   else if(b.t==='nest'){body='<div class="stat"><span>알 자리</span><b>'+b.st.eggs.length+' / '+c.slots[tier]+'</b></div>'+(tier<2?'<p class="src">가까이 가면 알을 주워요.</p>':'<p class="src">알을 저절로 창고에 모아요.</p>');}
   else if(b.t==='incub'){body='<div class="stat"><span>품는 알</span><b>'+b.st.eggs.length+' / '+c.slots[tier]+'</b><span>걸리는 시간</span><b>'+c.time[tier]+'초</b><span>창고 알</span><b>'+S.res.egg+'개</b></div>';
-    btns.push({t:'🥚 알 넣기',cls:'primary',dis:S.res.egg<1||b.st.eggs.length>=c.slots[tier],fn:()=>incubate(b)});}
+    const full=b.st.eggs.length>=c.slots[tier],cn=eggCounts(),ml=fertileSet(),brs=Object.keys(cn).sort((x,y)=>eggPri(x)-eggPri(y));
+    if(brs.length)body+='<p><b>창고 알</b></p><div class="stat">'+brs.map(k=>'<span>'+BREED[k].n+'</span><b>'+cn[k]+'개 · '+(ml.has(k)?'🐣 깨어날 수 있어요':'수컷이 없어 안 깨어나요')+'</b>').join('')+'</div>';
+    const ok=brs.filter(k=>ml.has(k));
+    if(ok.length>1)ok.forEach((k,n)=>btns.push({t:'🥚 '+BREED[k].n+' 알 넣기',cls:n===0?'primary':'',dis:full,fn:()=>incubate(b,k)}));
+    else btns.push({t:'🥚 알 넣기',cls:'primary',dis:S.res.egg<1||full,fn:()=>incubate(b)});}
   else if(b.t==='stall'){body='<div class="stat"><span>알 값</span><b>🪙 '+c.price[tier]+' / 개</b><span>한 번에</span><b>'+c.batch[tier]+'개까지</b><span>자동 판매</span><b>'+(S.autoSell?'켜짐':'꺼짐')+'</b></div>';
     btns.push({t:S.autoSell?'⏸ 자동 판매 끄기':'▶ 자동 판매 켜기',fn:()=>{S.autoSell=!S.autoSell;banner(S.autoSell?'알을 저절로 팔아요':'알을 팔지 않고 모아요');}});}
   if(up){body+='<h3>⬆ '+c.n[tier+1]+'(으)로 업그레이드</h3>'+costHTML(up);btns.unshift({t:'⬆ 업그레이드',cls:btns.length?'':'primary',dis:!canPay(up),fn:()=>upgrade(b)});}
@@ -1158,7 +1162,12 @@ function bldCard(id){const b=S.bld.find(q=>q.id===id);if(!b)return;const c=CAT[b
 function plant(b){if(sIdx()===3){banner('겨울에는 밀이 자라지 않아요. 봄을 기다려요');return;}b.st.stage='grow';b.st.t=0;pop();cnt('plant');cropLook(b);}
 function harvest(b){const c=CAT.field;add('grain',Math.round(c.yield[b.tier]*season().yield),bCenter(b),1.6);setTimeout(()=>add('straw',c.straw[b.tier],bCenter(b),2.3),250);b.st.stage=b.tier>=1?'grow':'empty';b.st.t=0;cnt('harvest');pop();cropLook(b);}
 function upgrade(b){const c=CAT[b.t].cost[b.tier+1];if(!canPay(c))return;pay(c);b.tier++;spawnB(b);if(b.t==='nest')bldR.get(b.id).R.n=-1;lvl();const cc=bCenter(b);burst(cc.x,2.5,cc.z,'⬆ LEVEL UP!');cnt('up');if(b.tier===2)cnt('tier3');banner(CAT[b.t].n[b.tier]+'(으)로 업그레이드!');save();}
-function incubate(b){if(S.res.egg<1)return;const males=new Set(S.ducks.filter(d=>d.sex==='m'&&d.age>=150).map(d=>d.b));let i=S.eggs.findIndex(e=>males.has(e));
+// 귀한 품종 알을 먼저 품어요(콜덕 → 머스코비 → 러너 → 그 밖 → 페킨). 품종을 골라 넣을 수도 있어요.
+const EGG_PRI=['call','muscovy','runner'];const eggPri=b=>{const i=EGG_PRI.indexOf(b);return i<0?(b==='pekin'?9:5):i;};
+const fertileSet=()=>new Set(S.ducks.filter(d=>d.sex==='m'&&d.age>=150).map(d=>d.b));
+function eggCounts(){const m={};S.eggs.forEach(e=>m[e]=(m[e]||0)+1);return m;}
+function incubate(b,want){if(S.res.egg<1)return;const males=fertileSet();let i=-1;
+  if(want)i=S.eggs.findIndex(e=>e===want&&males.has(e));else{let best=99;S.eggs.forEach((e,k)=>{if(males.has(e)&&eggPri(e)<best){best=eggPri(e);i=k;}});}
   if(i<0){if(!S.seen.infertile){S.seen.infertile=1;}fact('알이 깨어나지 않아요','<p class="fact">수컷 오리가 함께 지내야 품었을 때 새끼가 되는 알(유정란)이 생겨요. 지금 창고 알과 같은 품종의 다 큰 수컷이 농장에 없어요.</p>');return;}
   const br=S.eggs.splice(i,1)[0];S.res.egg--;b.st.eggs.push({b:br,t:0});cnt('incub');pop();banner(BREED[br].n+' 알을 넣었어요. 따뜻하게 품는 중…');}
 /* ================= 카드: 오리 ================= */
