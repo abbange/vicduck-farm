@@ -52,7 +52,7 @@
 - 새 자원(RES)을 추가하면 WHERE(얻는 곳 안내)에도 추가해야 함(없으면 상점이 멈췄던 적 있음).
 
 ## 가족 플레이어·방문 (1119d)
-- `WHO`(localStorage `<KEYBASE>-who`: kid/mom/dad)로 플레이어별 저장(`KEY`=KEYBASE+'-mom' 등, 클라우드 `save/mom`·`save/dad`). 부모님 메뉴 → 👤 플레이어 바꾸기. 엄마·아빠는 숙제 알림/수신 꺼짐.
+- `WHO`(localStorage `<KEYBASE>-who`: kid/mom/dad)로 플레이어별 저장(`KEY`=KEYBASE+'-mom' 등, 클라우드 `save/mom`·`save/dad`). 게임을 열면 로그인 화면(👧·👩·👨, 엄마·아빠는 각자 PIN `<KEYBASE>-pin-<who>`), ☰ 메뉴 → 👤 플레이어 바꾸기. 같은 탭 새로고침은 sessionStorage로 다시 안 물음. 엄마·아빠는 숙제 알림/수신 꺼짐.
 - 마을 버스 정류장 옆 🏡 가족 농장 표지판 → `?visit=<who>`로 상대 농장 구경(저장 안 함, 짓기·상점 막음). 🎁 선물·📝 영어 방명록은 `gift/<who>` 문서, 받는 쪽이 다음 접속 때 받음. 미리보기에선 localStorage로 대신함.
 - 새 동물: 🐷 돼지우리(버섯)·🐑 양 우리(양털 깎기)·🐐 염소 우리(염소젖)·🐰 토끼장(거름 → 밀밭 즉시 성장). `PENS`, `petsTick`, `petsNewDay`, 짓기 🐾 동물 탭.
 
