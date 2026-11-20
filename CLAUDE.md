@@ -70,3 +70,10 @@
 ## 테스트
 - Playwright 크로미움: `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`, three.min.js는 로컬 npm 사본으로 route, 폰트 abort. `?fast=2`면 `window.__farm` 디버그 훅(go, setY, walk, simCourse, simPath, closetCard, addRes, setDay 등).
 - 수정 후 `<script>` 블록 문법 검사(new Function) → 스크린샷 → 커밋.
+
+## 가족 놀이 (1121c)
+- 주(월요일 시작, `weekKey()`)마다 새로. 문서 `fam/coop`·`fam/contest`(Supabase docs key 허용 목록에 추가됨, 미리보기는 localStorage).
+- 🤝 가족 목표 `COOP`(달걀·수확·공방·주문·침입자·영어 정답 `engok`·부화): 각자 이번 주 `S.cnt` 증가분(`S.coop.base`)을 `prog[who]`로 올림, 합이 목표에 닿으면 각자 한 번 🪙80 ✨2. `coopSync` 60초마다.
+- 🏆 꾸미기 대회: 방문 중 ⭐ 별 주기(`voteCard`, 1~3개 + 영어 칭찬), 별 합계 → 같으면 `decoScore`. 다음 주 첫 접속 때 `last`로 넘기고 결과 카드(우승 🪙120 ✨3, 참가 🪙40, `S.contGot`).
+- 허브 `famHubCard`: 마을 👪 표지판, 🏘️ 마을 관리 버튼.
+- 주의: 오늘의 이야기는 `S.dstory`(예전 `S.story`는 이웃 이야기 부탁 단계 수와 겹쳐서 분리함).
