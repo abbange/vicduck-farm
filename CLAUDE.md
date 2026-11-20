@@ -77,3 +77,11 @@
 - 🏆 꾸미기 대회: 방문 중 ⭐ 별 주기(`voteCard`, 1~3개 + 영어 칭찬), 별 합계 → 같으면 `decoScore`. 다음 주 첫 접속 때 `last`로 넘기고 결과 카드(우승 🪙120 ✨3, 참가 🪙40, `S.contGot`).
 - 허브 `famHubCard`: 마을 👪 표지판, 🏘️ 마을 관리 버튼.
 - 주의: 오늘의 이야기는 `S.dstory`(예전 `S.story`는 이웃 이야기 부탁 단계 수와 겹쳐서 분리함).
+
+## 1121d~i 추가
+- 병 편지는 `bottleTex()` 유리병 그림(📜). 미니 도전 코스 제거(`miniTick` 호출 뺌).
+- 🎠 그네 타기 `swingOn/swingTick/swingOff`, 🪑 앉기 `SEATS`(벤치·피크닉·정자) `sitOn/sitTick`, 🧺 피크닉(오리 모임, 🍪 하루 한 번 애정 +1 `S.picDay`).
+- 🍽️ 사 먹기 `CAFE`/`FOOD`/`cafeCard`(공방 4종 + 마을 수아 언니 빵집): 영어 주문, 🎒 내 것 또는 🪙, 효과 `BUFF`(달리기 ×1.5 / 점프 8.8 / 잼=애정), `#buffChip`.
+- 땅값 `plotPrice`: 32×1.28^n, 나뭇가지·돌 2+n.
+- 🏠 집 안 걷기 `RW`, `roomWalk`(조이스틱, body.roomwalk), `RBOX` 가구 충돌, `RSEAT` 책상·소파·침대(눕기).
+- 🌊 큰 연못 `bigpond`(fp4, 🦆 오리 탭): `BPOND`(rebuildOcc에서 계산) → `inPond`·`waterSpot`·오리 AI·낚시 버튼에 반영, 겨울엔 얼음색.
