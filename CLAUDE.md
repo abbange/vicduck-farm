@@ -62,6 +62,7 @@
 - 📈 시세판(HUD 📈, `marketBoard`): `priceOf(k,day)` 날짜로 정해지는 값(파동+잡음+비제철 가산), 7일 그래프, 두 번 눌러 팔기.
 - 2단계(1120d) 가공 공방 `WK`: 빵집(밀3→빵)·치즈 공방(염소젖2→치즈)·털실 공방(양털2→목도리)·잼 공방(딸기3→잼)·파이 가게(호박1+밀2→파이). 재료가 창고에 있으면 `wkTick`이 저절로 생산(밀은 4개 남김), ⏸ 쉬기 토글, 굴뚝 연기. 동물 우리 생산물은 창고(RES mush/wool/milk)로. 시세판 탭 🌽작물·🐾동물·🏭가공품 + 🔗 생산 사슬 카드. 값 `PBASE`.
 - 3단계(1120e) 마을 성장 `townS()`(S.town): 🏡 주민 집(cottage, 방 2/3/4), 행복도 `happyParts`(기본20+꾸미기≤40+가게·공방≤20+개울≤8+주문≤20), 다음 날 행복도≥35+주민×3이고 빈 방 있으면 이사(영어 이름), 주민이 농장 돌아다님, 매일 주문(영어 문장)·전달 보상, 마을 기금, `townNewDay`가 📰 Duck Village Daily(영어+한국어, 🔊). HUD 🏘️ 마을 관리.
+- 🎲 오늘의 마을 이야기(1121a) `S.story`, `storyNewDay`(날짜 시드, 매일 3개): ①장소(🍾 병 편지 영어 수수께끼 `RIDDLES` / 🐥 길 잃은 아기 오리 "next to/behind/in front of the bakery" 찾기 `PLACES`·`PREPS` / 🧳 떠돌이 상인 영어 곱셈 문제) ②주민(❗ `NEEDS` 추론·`SOCIAL` 상황 표현) ③🏆 하루 도전 영어 지시문 `CHAL`(카운터 증가로 판정). `choiceCard`는 🔊 읽기·🇰🇷 뜻 보기·결과를 results에 kind:'story'로 기록. 신문 첫 기사로 나옴. 📘 영어 연속 일수 `engS()`(HUD 칩). 해결 시 행복도 보너스 `T2.bonus`.
 
 ## 그래픽
 - 기본은 `SOFT`(부드러운 3D: softPerson/softDuck, 둥근 나무, 스터드 없는 바닥). 메뉴에서 블록(로블록스) 스타일로 전환, localStorage `duck-farm-v1-style`.
