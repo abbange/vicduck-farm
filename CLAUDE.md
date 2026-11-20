@@ -85,3 +85,4 @@
 - 땅값 `plotPrice`: 32×1.28^n, 나뭇가지·돌 2+n.
 - 🏠 집 안 걷기 `RW`, `roomWalk`(조이스틱, body.roomwalk), `RBOX` 가구 충돌, `RSEAT` 책상·소파·침대(눕기).
 - 🌊 큰 연못 `bigpond`(fp4, 🦆 오리 탭): `BPOND`(rebuildOcc에서 계산) → `inPond`·`waterSpot`·오리 AI·낚시 버튼에 반영, 겨울엔 얼음색.
+- 1121j: 🏡 집 옮기기 허용(치우기는 안 됨). 💧 기본 연못도 옮기기: 🗺️ 계획 모드에서 연못을 톡 → pondCard → startMovePond(place.move='pond', CAT.pond fp4, occ -1). 위치 `S.pond`, 메시는 `pondG` 그룹(pondModel).
