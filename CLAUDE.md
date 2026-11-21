@@ -91,3 +91,4 @@
 - 주의(1121l 사고): 저장소 안에 심볼릭 링크(예: vo/vo)가 들어가면 GitHub Pages 빌드가 실패해서 아이 주소가 옛 버전으로 남음. 푸시 후 Actions 'pages build and deployment' 성공을 꼭 확인. 테스트용 링크는 scratchpad 밖에 만들지 말 것.
 - 1121o: 🎙️ 녹음 388개로 확대(이웃 부탁 "Could you bring me N ..." 28, 신문 이사·인기 상품·마을 문장, 현재 숙제·단어장 단어 56). 신문의 숫자 문장은 숫자 없는 영어로 바꿈(숫자는 한국어 줄에만).
 - ⚠️ 숙제·단어장을 새로 넣을 때마다 그 영어 단어/문장도 ElevenLabs(Remi)로 녹음해 VO에 넣고 배포해야 원어민 발음이 남(안 하면 기기 TTS). 한자는 읽지 않음.
+- 1121p: 🏡 2층 집(집 카드 ⬆ 업그레이드, 나뭇가지30·돌20·🪙300): 밖은 2층+발코니, 안은 텐트 자리에 계단(`roomStairs`) → `buildRoom2` 2층 놀이방(🎹 피아노 `pianoTune`·🔭 망원경(밤엔 starCard)·🟣 볼풀·이젤). `RW.floor`, `RBOX/RSEAT/RLIM`을 층마다 바꿈, 좌석의 `act`(up/down/scope)는 `roomAct`.
