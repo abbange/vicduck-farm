@@ -88,3 +88,4 @@
 - 1121j: 🏡 집 옮기기 허용(치우기는 안 됨). 💧 기본 연못도 옮기기: 🗺️ 계획 모드에서 연못을 톡 → pondCard → startMovePond(place.move='pond', CAT.pond fp4, occ -1). 위치 `S.pond`, 메시는 `pondG` 그룹(pondModel).
 - 1121l: 🚩 자동 체크포인트 `SAFE`(높이 1.2 이상 고정 발판에 0.3초 → 저장, `safeTick`), 2.2 넘게 떨어지면 🚩 버튼(`retryNear`, 15초), 7 넘게 떨어지면 자동(`respawnSafe`). 물속 감속 없앰, 빨리 달리기 끝날 때 6초 동안 서서히(`runMul`). 🌱 콩나무 `BEAN`(x19.8,z-13, 잎 43장 높이 ~42, 10장마다 쉼 잎·깃발) → ☁️ 구름 나라 🥚 황금 알(하루 한 번 🪙100 ✨2, `S.beanDay`)·🪂 내려가기. 카메라 높이 `ty`는 12 이상에서 그대로 따라감.
 - 1121m: 🚧 울타리 🔗 이어 붙이기(울타리 카드에서 켜기/끄기, `S.fenceLink`): `FENCEC` 이웃 칸 기준으로 가운데 기둥+팔(`fenceArms`, 로컬 회전 보정), 충돌도 팔 모양, 놓기·치우기·옮기기 때 `refreshFences`.
+- 주의(1121l 사고): 저장소 안에 심볼릭 링크(예: vo/vo)가 들어가면 GitHub Pages 빌드가 실패해서 아이 주소가 옛 버전으로 남음. 푸시 후 Actions 'pages build and deployment' 성공을 꼭 확인. 테스트용 링크는 scratchpad 밖에 만들지 말 것.
