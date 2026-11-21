@@ -86,3 +86,4 @@
 - 🏠 집 안 걷기 `RW`, `roomWalk`(조이스틱, body.roomwalk), `RBOX` 가구 충돌, `RSEAT` 책상·소파·침대(눕기).
 - 🌊 큰 연못 `bigpond`(fp4, 🦆 오리 탭): `BPOND`(rebuildOcc에서 계산) → `inPond`·`waterSpot`·오리 AI·낚시 버튼에 반영, 겨울엔 얼음색.
 - 1121j: 🏡 집 옮기기 허용(치우기는 안 됨). 💧 기본 연못도 옮기기: 🗺️ 계획 모드에서 연못을 톡 → pondCard → startMovePond(place.move='pond', CAT.pond fp4, occ -1). 위치 `S.pond`, 메시는 `pondG` 그룹(pondModel).
+- 1121l: 🚩 자동 체크포인트 `SAFE`(높이 1.2 이상 고정 발판에 0.3초 → 저장, `safeTick`), 2.2 넘게 떨어지면 🚩 버튼(`retryNear`, 15초), 7 넘게 떨어지면 자동(`respawnSafe`). 물속 감속 없앰, 빨리 달리기 끝날 때 6초 동안 서서히(`runMul`). 🌱 콩나무 `BEAN`(x19.8,z-13, 잎 43장 높이 ~42, 10장마다 쉼 잎·깃발) → ☁️ 구름 나라 🥚 황금 알(하루 한 번 🪙100 ✨2, `S.beanDay`)·🪂 내려가기. 카메라 높이 `ty`는 12 이상에서 그대로 따라감.
