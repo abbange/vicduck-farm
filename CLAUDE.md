@@ -95,3 +95,4 @@
 - 1121q: 🚩 "마지막 발판으로" 버튼 없앰(부모 요청). 높이 7 넘게 떨어질 때 자동으로 마지막 발판에 서는 것만 남김.
 - ✅ 배포 전 필수 점검: duck 저장소 `farm/tools/blackcheck.js` — `NODE_PATH=$(npm root -g) node farm/tools/blackcheck.js <preview.html 또는 index.html> [three.min.js 로컬 경로]`. 가족 클라우드 최신 저장(kid/mom/dad)+새 게임으로 열어 pageerror·검은 화면을 검사, 실패 시 exit 1. preview 올릴 때와 index 올릴 때 매번 실행하고, 푸시 후 Pages 배포 성공까지 확인. 심볼릭 링크 없는지도 확인.
 - 1121r: 📱 안내 문장 배너는 화면 위쪽 고정·작게(폰 12px, 2줄까지, 터치 통과), ⏱ 코스 시간은 아래 가운데 작게. 화면 톡 눌러 걸어가기 없앰. 2층 꾸미기: 🧸 인형 자리 `PSLOT2`(14곳, 층마다 `PSLOT` 교체)·🎨 벽지/바닥 `S.room2`(`roomRebuild`).
+- 1121s: 침입자는 높은 곳(girl.y>1.2: 코스·탑·콩나무)·코스 기록 중·계획 모드·그네·가족 농장 방문·마을에서는 안 나옴. 그때 있던 침입자는 조용히 도망감(`foeTick` 맨 앞).
